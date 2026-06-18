@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#E8735A">
+<title>ちいかわ店舗＆イベント</title>
+<style>
+:root {
+  --salmon: #E8735A; --salmon-light: #FDE8E2;
+  --green: #4CAF82; --green-light: #E0F5EB;
+  --blue: #5B9BD5; --blue-light: #E0EEFA;
+  --purple: #9B7FD4; --purple-light: #F0EBFC;
+  --yellow: #F0B429; --yellow-light: #FEF6E0;
+  --bg: #FFF8F5; --card: #FFFFFF;
+  --text: #2D1F1A; --text2: #7A5F58; --text3: #B09890;
+  --border: #F0E0DA; --radius: 14px;
+  --safe-top: env(safe-area-inset-top,0px);
+  --safe-bottom: env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:-apple-system,'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;}
+.header{background:var(--card);padding:calc(var(--safe-top) + 12px) 16px 10px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.header-title{font-size:17px;font-weight:700;} .header-title span{color:var(--salmon);}
+.header-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.nav-tabs{display:flex;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0;}
+.nav-tab{flex:1;padding:10px 4px;text-align:center;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;}
+.nav-tab.active{color:var(--salmon);border-bottom-color:var(--salmon);}
+.region-tabs{display:flex;overflow-x:auto;padding:8px 12px;gap:6px;background:var(--bg);flex-shrink:0;scrollbar-width:none;}
+.region-tabs::-webkit-scrollbar{display:none;}
+.rtab{flex-shrink:0;padding:4px 10px;border-radius:99px;border:1.5px solid var(--border);font-size:11px;font-weight:500;color:var(--text2);background:var(--card);cursor:pointer;}
+.rtab.active{background:var(--salmon);color:white;border-color:var(--salmon);}
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px 12px calc(var(--safe-bottom)+16px);}
+/* cards */
+.shop-card{background:var(--card);border-radius:var(--radius);margin-bottom:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.shop-header{padding:12px 14px 8px;}
+.shop-name{font-size:14px;font-weight:700;color:var(--text);}
+.shop-address{font-size:11px;color:var(--text2);margin-top:3px;line-height:1.4;}
+.shop-badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.badge{font-size:10px;padding:2px 7px;border-radius:99px;font-weight:600;}
+.badge-land{background:var(--salmon-light);color:var(--salmon);}
+.badge-park{background:var(--purple-light);color:var(--purple);}
+.badge-food{background:var(--yellow-light);color:#B8860B;}
+.badge-popup{background:var(--blue-light);color:var(--blue);}
+.badge-magic{background:var(--green-light);color:var(--green);}
+.shop-actions{display:flex;border-top:1px solid var(--border);}
+.action-btn{flex:1;padding:9px 6px;text-align:center;font-size:12px;font-weight:600;color:var(--salmon);cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:4px;}
+.action-btn:not(:last-child){border-right:1px solid var(--border);}
+/* event card */
+.ev-card{background:var(--card);border-radius:var(--radius);margin-bottom:8px;padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.ev-header{display:flex;gap:8px;align-items:flex-start;}
+.ev-icon{font-size:22px;flex-shrink:0;}
+.ev-name{font-size:13px;font-weight:700;color:var(--text);line-height:1.3;}
+.ev-date{font-size:11px;color:var(--salmon);font-weight:600;margin-top:3px;}
+.ev-place{font-size:11px;color:var(--text2);margin-top:2px;}
+.ev-desc{font-size:11px;color:var(--text2);margin-top:6px;line-height:1.5;padding-top:6px;border-top:1px solid var(--border);}
+.ev-link{display:inline-block;margin-top:8px;font-size:11px;font-weight:600;color:var(--salmon);text-decoration:none;}
+/* gps banner */
+.gps-banner{background:var(--blue-light);border-radius:var(--radius);padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;cursor:pointer;}
+.gps-text{font-size:12px;color:var(--blue);font-weight:600;}
+.gps-sub{font-size:10px;color:var(--text2);margin-top:1px;}
+.near-badge{background:var(--green);color:white;font-size:9px;padding:1px 5px;border-radius:99px;margin-left:4px;font-weight:700;}
+.empty{text-align:center;padding:2rem;font-size:14px;color:var(--text3);}
+.scroll-area { padding-bottom: calc(var(--safe-bottom) + 70px) !important; }
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);display:flex;padding-bottom:var(--safe-bottom);z-index:100;}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;cursor:pointer;text-decoration:none;font-size:10px;font-weight:600;color:var(--text3);gap:2px;}
+.bnav-item.active{color:var(--salmon);}
+.bnav-icon{font-size:22px;line-height:1;}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-title">🗺️ <span>ちいかわ</span>店舗＆イベント</div>
+  <div class="header-sub">2026年6月現在 ／ 公式情報をもとに作成</div>
+</div>
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="switchTab('shops',this)">🏪 店舗マップ</div>
+  <div class="nav-tab" onclick="switchTab('events',this)">📅 イベント</div>
+</div>
+<div class="region-tabs" id="region-tabs"></div>
+<div class="scroll-area" id="main-content"></div>
+<nav class="bottom-nav">
+  <a class="bnav-item" href="index.html"><span class="bnav-icon">✅</span>コレクション</a>
+  <a class="bnav-item active" href="shops.html"><span class="bnav-icon">🗺️</span>店舗・イベント</a>
+</nav>
+
+<script>
+const SHOPS = [
+  {region:'hokkaido', name:'ちいかわらんど 札幌パルコ店', addr:'北海道札幌市中央区南1条西3丁目 札幌パルコ', types:['land'], lat:43.0617, lng:141.3545, url:'https://chiikawa-info.jp/chiikawaland/sapporo/index.html'},
+  {region:'tohoku', name:'ちいかわらんど 仙台パルコ店', addr:'宮城県仙台市青葉区中央1-2-3 仙台パルコ', types:['land'], lat:38.2600, lng:140.8822, url:'https://chiikawa-info.jp/chiikawaland/sendai/index.html'},
+  {region:'kanto', name:'ちいかわらんど 原宿店', addr:'東京都渋谷区神宮前1丁目 原宿', types:['land'], lat:35.6707, lng:139.7026, url:'https://chiikawa-info.jp/chiikawaland/harajuku/index.html'},
+  {region:'kanto', name:'ちいかわらんど TOKYO Station', addr:'東京都千代田区丸の内1丁目 東京駅一番街B1', types:['land'], lat:35.6812, lng:139.7671, url:'https://chiikawa-info.jp/chiikawaland/tokyo/index.html'},
+  {region:'kanto', name:'ちいかわらんど 東京スカイツリータウン・ソラマチ店', addr:'東京都墨田区押上1-1-2 東京ソラマチ', types:['land'], lat:35.7101, lng:139.8107, url:'https://chiikawa-info.jp/chiikawaland/solamachi/index.html'},
+  {region:'kanto', name:'ちいかわらんど 新宿店', addr:'東京都新宿区新宿3丁目 新宿マルイアネックス', types:['land'], lat:35.6896, lng:139.7006, url:'https://chiikawa-info.jp/chiikawaland/shinjuku/index.html'},
+  {region:'kanto', name:'ちいかわらんど 池袋パルコ店', addr:'東京都豊島区南池袋1-28-2 池袋PARCO B2F', types:['land'], lat:35.7296, lng:139.7109, url:'https://chiikawa-info.jp/chiikawaland/ikebukuro/index.html'},
+  {region:'kanto', name:'ちいかわらんど 越谷レイクタウン店', addr:'埼玉県越谷市レイクタウン3-1-1 越谷レイクタウン', types:['land'], lat:35.8729, lng:139.8207, url:'https://chiikawa-info.jp/chiikawaland/koshigaya/index.html'},
+  {region:'kanto', name:'ちいかわらんど 横浜店', addr:'神奈川県横浜市西区高島2-18-1 そごう横浜店', types:['land'], lat:35.4662, lng:139.6247, url:'https://chiikawa-info.jp/chiikawaland/yokohama/index.html'},
+  {region:'kanto', name:'ちいかわパーク 池袋', addr:'東京都豊島区東池袋3-1-3 サンシャインシティ', types:['park'], lat:35.7291, lng:139.7191, url:'https://chiikawa-info.jp/'},
+  {region:'kanto', name:'ちいかわレストラン 池袋', addr:'東京都豊島区南池袋1-28-2 池袋PARCO本館7F', types:['food'], lat:35.7296, lng:139.7109, url:'https://chiikawa-info.jp/'},
+  {region:'kanto', name:'ちいかわラーメン 豚 池袋', addr:'東京都豊島区東池袋 池袋エリア', types:['food'], lat:35.7296, lng:139.7130, url:'https://chiikawa-info.jp/'},
+  {region:'kanto', name:'ちいかわラーメン 豚 渋谷', addr:'東京都渋谷区渋谷 渋谷エリア', types:['food'], lat:35.6580, lng:139.7016, url:'https://chiikawa-info.jp/'},
+  {region:'chubu', name:'ちいかわらんど 名古屋パルコ店', addr:'愛知県名古屋市中区栄3-29-1 名古屋パルコ', types:['land'], lat:35.1685, lng:136.9070, url:'https://chiikawa-info.jp/chiikawaland/nagoya/index.html'},
+  {region:'chubu', name:'ちいかわラーメン 豚 名古屋', addr:'愛知県名古屋市中区栄 名古屋エリア', types:['food'], lat:35.1700, lng:136.9070, url:'https://chiikawa-info.jp/'},
+  {region:'chubu', name:'ちいかわらんど 金沢フォーラス店', addr:'石川県金沢市堀川新町3-1 金沢フォーラス', types:['land'], lat:36.5748, lng:136.6556, url:'https://chiikawa-info.jp/chiikawaland/kanazawa/index.html'},
+  {region:'kinki', name:'ちいかわらんど 大阪梅田店', addr:'大阪府大阪市北区 阪急三番街南館B1F', types:['land'], lat:34.7055, lng:135.4983, url:'https://chiikawa-info.jp/chiikawaland/osaka/index.html'},
+  {region:'kinki', name:'ちいかわらんど 心斎橋パルコ店', addr:'大阪府大阪市中央区心斎橋筋1-8-3 心斎橋パルコ', types:['land'], lat:34.6731, lng:135.5009, url:'https://chiikawa-info.jp/chiikawaland/shinsaibashi/index.html'},
+  {region:'kinki', name:'ちいかわラーメン 豚 大阪', addr:'大阪府大阪市 大阪エリア', types:['food'], lat:34.6937, lng:135.5023, url:'https://chiikawa-info.jp/'},
+  {region:'kinki', name:'ちいかわらんど 京都四条河原町店', addr:'京都府京都市下京区四条通河原町 マルイ京都', types:['land'], lat:35.0037, lng:135.7694, url:'https://chiikawa-info.jp/chiikawaland/kyoto/index.html'},
+  {region:'chugoku', name:'ちいかわらんど 広島パルコ店', addr:'広島県広島市中区基町6-27 広島パルコ', types:['land'], lat:34.3963, lng:132.4596, url:'https://chiikawa-info.jp/chiikawaland/hiroshima/index.html'},
+  {region:'chugoku', name:'ちいかわラーメン 豚 広島', addr:'広島県広島市中区 広島エリア', types:['food'], lat:34.3963, lng:132.4610, url:'https://chiikawa-info.jp/'},
+  {region:'kyushu', name:'ちいかわらんど 福岡パルコ店', addr:'福岡県福岡市中央区天神2-11-1 福岡パルコ', types:['land'], lat:33.5898, lng:130.3988, url:'https://chiikawa-info.jp/chiikawaland/fukuoka/index.html'},
+  {region:'okinawa', name:'シーサーのおみやげやさん', addr:'沖縄県 沖縄エリア', types:['magic'], lat:26.2124, lng:127.6792, url:'https://chiikawa-info.jp/'},
+];
+
+const EVENTS = [
+  {
+    icon:'🎬', name:'映画ちいかわ 公開記念コラボイベント',
+    date:'2026年7月10日(金)〜10月31日(土)',
+    place:'東京スカイツリータウン・ソラマチ 他全国',
+    desc:'映画公開を記念した大規模コラボイベント。スカイツリーでは展望台入場券＋ブロマイドのセットチケットあり（大人3,300円〜）。',
+    url:'https://www.tokyo-skytree.jp/event/special/chiikawa/'
+  },
+  {
+    icon:'🎬', name:'映画ちいかわ 劇場公開',
+    date:'2026年7月24日(金)〜',
+    place:'全国映画館',
+    desc:'「ちいかわ☆星ふるスカイツリーとひみつの島」公開。島での討伐冒険が描かれる劇場版。',
+    url:'https://chiikawa-info.jp/'
+  },
+  {
+    icon:'🎪', name:'ちいかわらんど 越谷レイクタウン店 オープン',
+    date:'2026年6月19日(金)〜',
+    place:'埼玉県越谷市 越谷レイクタウン',
+    desc:'最新オープン！全国16店舗目のちいかわらんど。オープン記念ノベルティあり。',
+    url:'https://chiikawa-info.jp/chiikawaland/koshigaya/index.html'
+  },
+  {
+    icon:'🛍️', name:'ドン・キホーテ限定グッズ発売',
+    date:'2026年6月6日(土)〜',
+    place:'全国ドン・キホーテ各店',
+    desc:'ドン・キホーテ限定のちいかわグッズが発売。',
+    url:'https://chiikawa-info.jp/'
+  },
+  {
+    icon:'🎡', name:'POP UP STORE パルクアベニュー・カワトク',
+    date:'2026年7月31日(金)〜8月17日(月)',
+    place:'岩手県盛岡市 パルクアベニュー・カワトク 7F',
+    desc:'期間限定ポップアップショップ。グッズ販売多数。',
+    url:'https://chiikawa-info.jp/pus.html'
+  },
+  {
+    icon:'🎡', name:'POP UP STORE キャナルシティオーパ',
+    date:'2026年5月16日(土)〜6月28日(日)',
+    place:'福岡県福岡市 キャナルシティオーパ センターウォークB1F',
+    desc:'期間限定ポップアップショップ。',
+    url:'https://chiikawa-info.jp/pus.html'
+  },
+  {
+    icon:'🏮', name:'ちいかわ×ホークス コラボ',
+    date:'2026年開催中',
+    place:'福岡県 みずほPayPayドーム周辺',
+    desc:'福岡ソフトバンクホークスとのコラボイベント。詳細は公式サイトへ。',
+    url:'https://chiikawa-info.jp/'
+  },
+  {
+    icon:'☕', name:'ちいかわ期間限定カフェ',
+    date:'2026年 全国各地で随時開催',
+    place:'全国各地（公式サイトで随時更新）',
+    desc:'全国各地で期間限定カフェが開催中。コラボメニューや限定グッズが登場。最新情報は公式サイトをチェック。',
+    url:'https://chiikawa-info.jp/'
+  },
+];
+
+const REGIONS = [
+  {id:'all', label:'すべて'},
+  {id:'hokkaido', label:'北海道'},
+  {id:'tohoku', label:'東北'},
+  {id:'kanto', label:'関東'},
+  {id:'chubu', label:'中部'},
+  {id:'kinki', label:'関西'},
+  {id:'chugoku', label:'中国'},
+  {id:'kyushu', label:'九州'},
+  {id:'okinawa', label:'沖縄'},
+];
+
+const TYPE_INFO = {
+  land:{label:'ちいかわらんど', cls:'badge-land'},
+  park:{label:'ちいかわパーク', cls:'badge-park'},
+  food:{label:'グルメスポット', cls:'badge-food'},
+  popup:{label:'POP UP', cls:'badge-popup'},
+  magic:{label:'まじかるストア', cls:'badge-magic'},
+};
+
+let currentTab = 'shops';
+let currentRegion = 'all';
+let userLat = null, userLng = null;
+
+function dist(lat1,lng1,lat2,lng2){
+  const R=6371;const dLat=(lat2-lat1)*Math.PI/180;const dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function buildRegionTabs(){
+  const wrap=document.getElementById('region-tabs');
+  wrap.innerHTML='';
+  REGIONS.forEach(r=>{
+    const b=document.createElement('div');
+    b.className='rtab'+(currentRegion===r.id?' active':'');
+    b.textContent=r.label;
+    b.onclick=()=>{currentRegion=r.id;document.querySelectorAll('.rtab').forEach(x=>x.classList.remove('active'));b.classList.add('active');render();};
+    wrap.appendChild(b);
+  });
+}
+
+function switchTab(tab, el){
+  currentTab=tab;
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const rw=document.getElementById('region-tabs');
+  rw.style.display=tab==='shops'?'flex':'none';
+  render();
+}
+
+function render(){
+  const c=document.getElementById('main-content');
+  c.innerHTML='';
+  if(currentTab==='shops') renderShops(c);
+  else renderEvents(c);
+}
+
+function renderShops(c){
+  // GPS banner
+  const gps=document.createElement('div');
+  gps.className='gps-banner';
+  gps.innerHTML=`<span style="font-size:22px">📍</span><div><div class="gps-text">現在地から近い店舗を探す</div><div class="gps-sub">${userLat?'位置情報取得済み — 距離順で表示中':'タップして現在地を取得'}</div></div>`;
+  gps.onclick=getLocation;
+  c.appendChild(gps);
+
+  let shops=SHOPS.filter(s=>currentRegion==='all'||s.region===currentRegion);
+  if(userLat) shops=[...shops].sort((a,b)=>dist(userLat,userLng,a.lat,a.lng)-dist(userLat,userLng,b.lat,b.lng));
+
+  if(shops.length===0){c.innerHTML+='<div class="empty">この地域の店舗情報はありません</div>';return;}
+
+  shops.forEach(s=>{
+    const d=userLat?dist(userLat,userLng,s.lat,s.lng):null;
+    const isNear=d&&d<30;
+    const card=document.createElement('div');card.className='shop-card';
+    card.innerHTML=`
+      <div class="shop-header">
+        <div class="shop-name">${s.name}${isNear?'<span class="near-badge">近い!</span>':''}</div>
+        <div class="shop-address">📍 ${s.addr}${d?` <span style="color:var(--salmon);font-weight:600">— 約${d<1?Math.round(d*1000)+'m':Math.round(d)+'km'}</span>`:''}</div>
+        <div class="shop-badges">${s.types.map(t=>`<span class="badge ${TYPE_INFO[t].cls}">${TYPE_INFO[t].label}</span>`).join('')}</div>
+      </div>
+      <div class="shop-actions">
+        <a class="action-btn" href="https://maps.apple.com/?q=${encodeURIComponent(s.name)}&ll=${s.lat},${s.lng}" target="_blank">🗺️ マップ</a>
+        <a class="action-btn" href="${s.url}" target="_blank">🌐 公式サイト</a>
+      </div>`;
+    c.appendChild(card);
+  });
+}
+
+function renderEvents(c){
+  EVENTS.forEach(ev=>{
+    const card=document.createElement('div');card.className='ev-card';
+    card.innerHTML=`
+      <div class="ev-header">
+        <span class="ev-icon">${ev.icon}</span>
+        <div>
+          <div class="ev-name">${ev.name}</div>
+          <div class="ev-date">📅 ${ev.date}</div>
+          <div class="ev-place">📍 ${ev.place}</div>
+        </div>
+      </div>
+      <div class="ev-desc">${ev.desc}<br><a class="ev-link" href="${ev.url}" target="_blank">▶ 詳細・公式サイト</a></div>`;
+    c.appendChild(card);
+  });
+}
+
+function getLocation(){
+  if(!navigator.geolocation){alert('位置情報が使えません');return;}
+  navigator.geolocation.getCurrentPosition(pos=>{
+    userLat=pos.coords.latitude;userLng=pos.coords.longitude;
+    render();
+  },()=>alert('位置情報の取得に失敗しました。設定でSafariの位置情報をオンにしてください。'));
+}
+
+buildRegionTabs();
+render();
+</script>
+</body>
+</html>

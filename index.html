@@ -51,7 +51,11 @@ body { font-family: -apple-system,'Hiragino Sans','Hiragino Kaku Gothic ProN',sa
 .filter-row { display: flex; gap: 6px; padding: 8px 12px; background: var(--bg); flex-shrink: 0; }
 .filter-btn { flex: 1; padding: 6px 4px; border-radius: 8px; border: 1.5px solid var(--border); font-size: 11px; font-weight: 500; color: var(--text2); background: var(--card); cursor: pointer; transition: all 0.15s; }
 .filter-btn.active { border-color: var(--salmon); color: var(--salmon); background: var(--salmon-light); }
-.scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 8px 12px calc(var(--safe-bottom) + 16px); }
+.scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 8px 12px calc(var(--safe-bottom) + 70px); }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); display: flex; padding-bottom: var(--safe-bottom); z-index: 100; }
+.bnav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 4px; cursor: pointer; text-decoration: none; font-size: 10px; font-weight: 600; color: var(--text3); gap: 2px; }
+.bnav-item.active { color: var(--salmon); }
+.bnav-icon { font-size: 22px; line-height: 1; }
 .pref-section { background: var(--card); border-radius: var(--radius); margin-bottom: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
 .pref-header { display: flex; justify-content: space-between; align-items: center; padding: 11px 14px; cursor: pointer; user-select: none; -webkit-user-select: none; }
 .pref-header.complete { background: var(--green-light); }
@@ -106,6 +110,10 @@ body { font-family: -apple-system,'Hiragino Sans','Hiragino Kaku Gothic ProN',sa
   <button class="filter-btn" onclick="setFilter('checked',this)">コンプ済み</button>
 </div>
 <div class="scroll-area"><div id="list-container"></div></div>
+<nav class="bottom-nav">
+  <a class="bnav-item active" href="index.html"><span class="bnav-icon">✅</span>コレクション</a>
+  <a class="bnav-item" href="shops.html"><span class="bnav-icon">🗺️</span>店舗・イベント</a>
+</nav>
 <script>
 const CHARS=[{id:'c',short:'ちい',emoji:'🟠'},{id:'h',short:'ハチ',emoji:'🔵'},{id:'u',short:'うさぎ',emoji:'🩷'}];
 const REGIONS=[
