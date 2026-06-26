@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ちいかわ収集">
+<meta name="theme-color" content="#E8735A">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>ちいかわご当地コレクション</title>
+<style>
+:root {
+  --salmon: #E8735A;
+  --salmon-light: #FDE8E2;
+  --blue: #5B9BD5;
+  --pink: #D4537E;
+  --green: #4CAF82;
+  --green-light: #E0F5EB;
+  --bg: #FFF8F5;
+  --card: #FFFFFF;
+  --text: #2D1F1A;
+  --text2: #7A5F58;
+  --text3: #B09890;
+  --border: #F0E0DA;
+  --radius: 14px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; }
+body { font-family: -apple-system,'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; }
+.header { background: var(--card); padding: calc(var(--safe-top) + 14px) 16px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.header-title { font-size: 17px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+.header-title span { color: var(--salmon); }
+.header-title-row { display: flex; justify-content: space-between; align-items: center; }
+.settings-btn { font-size: 18px; cursor: pointer; padding: 4px; -webkit-user-select: none; user-select: none; flex-shrink: 0; }
+.header-sub { font-size: 12px; color: var(--text2); margin-top: 1px; }
+.prog-wrap { background: var(--border); border-radius: 99px; height: 6px; overflow: hidden; margin-top: 10px; }
+.prog-fill { height: 6px; border-radius: 99px; background: linear-gradient(90deg,var(--salmon),#F4A48A); transition: width 0.4s ease; }
+.prog-row { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
+.prog-num { font-size: 12px; font-weight: 600; color: var(--salmon); }
+.prog-total { font-size: 11px; color: var(--text3); }
+.legend { display: flex; gap: 10px; margin-top: 10px; }
+.leg { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text2); font-weight: 500; }
+.leg-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.tabs-wrap { background: var(--card); border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.search-wrap { padding: 8px 12px; background: var(--card); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.search-box { display: flex; align-items: center; background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 7px 10px; gap: 6px; }
+.search-box input { flex: 1; border: none; background: transparent; font-size: 13px; color: var(--text); outline: none; font-family: inherit; }
+.search-box input::placeholder { color: var(--text3); }
+.search-icon { font-size: 13px; color: var(--text3); flex-shrink: 0; }
+.search-clear { font-size: 13px; color: var(--text3); cursor: pointer; padding: 2px 4px; flex-shrink: 0; display: none; }
+.search-result-tag { display: inline-block; font-size: 9px; padding: 1px 6px; border-radius: 99px; background: var(--blue-light); color: var(--blue); font-weight: 600; margin-left: 6px; }
+.search-pref-label { font-size: 10px; color: var(--salmon); font-weight: 700; margin-bottom: 2px; }
+.tabs-wrap::-webkit-scrollbar { display: none; }
+.tabs { display: flex; padding: 8px 12px; gap: 6px; width: max-content; }
+.tab { flex-shrink: 0; padding: 5px 12px; border-radius: 99px; border: 1.5px solid var(--border); font-size: 12px; font-weight: 500; color: var(--text2); background: transparent; cursor: pointer; transition: all 0.15s; }
+.tab.active { background: var(--salmon); color: white; border-color: var(--salmon); }
+.filter-row { display: flex; gap: 6px; padding: 8px 12px; background: var(--bg); flex-shrink: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.filter-row::-webkit-scrollbar { display: none; }
+.filter-btn { flex-shrink: 0; padding: 6px 10px; border-radius: 8px; border: 1.5px solid var(--border); font-size: 11px; font-weight: 500; color: var(--text2); background: var(--card); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.filter-btn.active { border-color: var(--salmon); color: var(--salmon); background: var(--salmon-light); }
+.scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 8px 12px calc(var(--safe-bottom) + 70px); }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); display: flex; padding-bottom: var(--safe-bottom); z-index: 100; }
+.bnav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 4px; cursor: pointer; text-decoration: none; font-size: 10px; font-weight: 600; color: var(--text3); gap: 2px; }
+.bnav-item.active { color: var(--salmon); }
+.bnav-icon { font-size: 22px; line-height: 1; }
+.pref-section { background: var(--card); border-radius: var(--radius); margin-bottom: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.pref-header { display: flex; justify-content: space-between; align-items: center; padding: 11px 14px; cursor: pointer; user-select: none; -webkit-user-select: none; }
+.pref-header.complete { background: var(--green-light); }
+.pref-name { font-size: 14px; font-weight: 700; }
+.pref-right { display: flex; align-items: center; gap: 6px; }
+.pref-badge { font-size: 11px; color: var(--text3); font-weight: 500; }
+.pref-badge.done { color: var(--green); }
+.chevron { color: var(--text3); font-size: 11px; transition: transform 0.2s; display: inline-block; }
+.chevron.open { transform: rotate(180deg); }
+.col-header { display: flex; border-top: 1px solid var(--border); background: #FDFAF9; }
+.col-header-label { flex: 1; padding: 5px 14px; font-size: 10px; color: var(--text3); font-weight: 500; display: flex; align-items: center; }
+.col-header-chars { display: flex; }
+.col-header-char { width: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 2px; border-left: 1px solid var(--border); font-size: 10px; color: var(--text2); font-weight: 600; gap: 1px; line-height: 1.2; }
+.item { display: flex; align-items: center; border-top: 1px solid var(--border); }
+.item-label { flex: 1; padding: 8px 6px 8px 14px; font-size: 13px; color: var(--text); line-height: 1.3; display: flex; align-items: center; gap: 6px; }
+.item-thumb { width: 22px; height: 22px; border-radius: 5px; object-fit: cover; flex-shrink: 0; border: 1px solid var(--border); }
+.memo-btn { width: 32px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; position: relative; padding: 8px 0; -webkit-user-select: none; user-select: none; }
+.memo-btn.has-memo::after { content: ''; position: absolute; top: 6px; right: 6px; width: 6px; height: 6px; border-radius: 50%; background: var(--salmon); }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal-sheet { background: var(--card); border-radius: 18px 18px 0 0; width: 100%; max-width: 480px; padding: 16px 16px calc(var(--safe-bottom) + 16px); animation: slideUp 0.25s ease; max-height: 85vh; overflow-y: auto; }
+@keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.modal-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.modal-sub { font-size: 11px; color: var(--text2); margin-bottom: 12px; }
+.photo-section { margin-bottom: 12px; }
+.photo-preview-wrap { position: relative; width: 100%; border-radius: 12px; overflow: hidden; background: var(--bg); border: 1.5px dashed var(--border); }
+.photo-preview-img { width: 100%; max-height: 220px; object-fit: contain; display: block; background: var(--bg); }
+.photo-remove-btn { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; border-radius: 50%; background: rgba(0,0,0,0.55); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; }
+.photo-add-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 16px; border-radius: 12px; border: 1.5px dashed var(--border); color: var(--text2); font-size: 13px; font-weight: 600; cursor: pointer; background: var(--bg); }
+.photo-add-btn span.icon { font-size: 18px; }
+.modal-textarea { width: 100%; min-height: 70px; border: 1.5px solid var(--border); border-radius: 10px; padding: 10px; font-size: 14px; font-family: inherit; color: var(--text); resize: none; background: var(--bg); }
+.modal-textarea:focus { outline: none; border-color: var(--salmon); }
+.modal-actions { display: flex; gap: 8px; margin-top: 12px; }
+.modal-btn { flex: 1; padding: 11px; border-radius: 10px; font-size: 14px; font-weight: 600; text-align: center; cursor: pointer; border: none; }
+.modal-btn.save { background: var(--salmon); color: white; }
+.modal-btn.cancel { background: var(--border); color: var(--text2); }
+.settings-section { margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.settings-section:last-of-type { border-bottom: none; }
+.settings-label { font-size: 13px; font-weight: 700; color: var(--text); }
+.settings-desc { font-size: 11px; color: var(--text2); margin-top: 3px; line-height: 1.5; }
+.stat-block { margin-bottom: 16px; }
+.stat-block-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.stat-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.stat-label { font-size: 11px; color: var(--text2); width: 64px; flex-shrink: 0; }
+.stat-bar-wrap { flex: 1; height: 14px; background: var(--border); border-radius: 99px; overflow: hidden; }
+.stat-bar-fill { height: 14px; border-radius: 99px; transition: width 0.4s ease; }
+.stat-pct { font-size: 11px; font-weight: 700; color: var(--text2); width: 38px; text-align: right; flex-shrink: 0; }
+.stat-summary-grid { display: flex; gap: 8px; margin-bottom: 16px; }
+.stat-summary-card { flex: 1; background: var(--bg); border-radius: 10px; padding: 10px; text-align: center; }
+.stat-summary-num { font-size: 20px; font-weight: 800; color: var(--salmon); }
+.stat-summary-label { font-size: 10px; color: var(--text2); margin-top: 2px; }
+.stat-char-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.stat-char-card { flex: 1; background: var(--bg); border-radius: 10px; padding: 10px; text-align: center; }
+.stat-char-emoji { font-size: 20px; }
+.stat-char-num { font-size: 16px; font-weight: 800; margin-top: 2px; }
+.stat-char-label { font-size: 10px; color: var(--text2); }
+.stat-best-worst { font-size: 11px; color: var(--text2); line-height: 1.7; background: var(--bg); border-radius: 10px; padding: 10px; }
+.stat-scroll { max-height: 60vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.photo-viewer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 300; display: none; align-items: center; justify-content: center; }
+.photo-viewer-overlay.open { display: flex; }
+.photo-viewer-img { max-width: 92%; max-height: 80%; border-radius: 8px; }
+.photo-viewer-close { position: absolute; top: calc(var(--safe-top) + 14px); right: 16px; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.2); color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.type-badge { display: inline-block; font-size: 9px; padding: 1px 5px; border-radius: 99px; margin-left: 4px; font-weight: 600; vertical-align: middle; }
+.type-kh { background: #EEEDFE; color: #4B44AA; }
+.type-mas { background: var(--green-light); color: #2D7A55; }
+.char-cells { display: flex; }
+.char-cell { width: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 2px; border-left: 1px solid var(--border); cursor: pointer; gap: 3px; -webkit-user-select: none; user-select: none; }
+.char-cell:active { background: var(--bg); }
+.char-emoji { font-size: 15px; line-height: 1; }
+.check-ring { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; transition: all 0.15s; background: white; font-size: 10px; font-weight: 800; color: white; }
+.check-ring.on-0 { background: var(--salmon); border-color: var(--salmon); }
+.check-ring.on-1 { background: var(--blue); border-color: var(--blue); }
+.check-ring.on-2 { background: var(--pink); border-color: var(--pink); }
+.check-ring.on-3 { background: #9B7FD4; border-color: #9B7FD4; }
+.check-ring.on-4 { background: #C9A227; border-color: #C9A227; }
+.check-ring.on-5 { background: #5BAE8C; border-color: #5BAE8C; }
+.check-ring.on-6 { background: #B5651D; border-color: #B5651D; }
+.qty-badge { position: absolute; top: -4px; right: -4px; background: var(--text); color: white; font-size: 9px; font-weight: 700; border-radius: 99px; min-width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; padding: 0 3px; }
+.char-cell { position: relative; }
+.wish-star { position: absolute; top: -2px; left: -2px; font-size: 11px; line-height: 1; opacity: 0.25; cursor: pointer; padding: 2px; z-index: 5; }
+.wish-star.active { opacity: 1; }
+.empty-msg { text-align: center; padding: 3rem 1rem; font-size: 14px; color: var(--text3); }
+@keyframes pop { 0%{transform:scale(0.7)} 60%{transform:scale(1.2)} 100%{transform:scale(1)} }
+.pop { animation: pop 0.2s ease; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-title-row">
+    <div class="header-title">🐾 <span>ちいかわ</span>ご当地コレクション</div>
+    <div style="display:flex;gap:4px;">
+      <div class="settings-btn" onclick="openStatsModal()">📊</div>
+      <div class="settings-btn" onclick="openSettingsModal()">⚙️</div>
+    </div>
+  </div>
+  <div class="header-sub">北海道〜沖縄 全都道府県</div>
+  <div class="prog-wrap"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  <div class="prog-row">
+    <span class="prog-num" id="prog-num">0個入手済み</span>
+    <span class="prog-total" id="prog-total">全0個中</span>
+  </div>
+  <div class="legend">
+    <div class="leg"><div class="leg-dot" style="background:var(--salmon)"></div>ちいかわ</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--blue)"></div>ハチワレ</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--pink)"></div>うさぎ</div>
+  </div>
+</div>
+<div class="search-wrap">
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search-input" placeholder="アイテム名で検索（例：メロン、たこ焼き）" autocomplete="off">
+    <span class="search-clear" id="search-clear">✕</span>
+  </div>
+</div>
+<div class="tabs-wrap" id="tabs-wrap-el"><div class="tabs" id="region-tabs"></div></div>
+<div class="filter-row" id="filter-row-el">
+  <button class="filter-btn active" onclick="setFilter('all',this)">すべて</button>
+  <button class="filter-btn" onclick="setFilter('unchecked',this)">未入手あり</button>
+  <button class="filter-btn" onclick="setFilter('checked',this)">コンプ済み</button>
+  <button class="filter-btn" onclick="setFilter('wish',this)">★欲しい</button>
+  <button class="filter-btn" onclick="setFilter('trade',this)">🔄交換できる</button>
+</div>
+<div class="scroll-area"><div id="list-container"></div></div>
+
+<div class="modal-overlay" id="memo-modal">
+  <div class="modal-sheet">
+    <div class="modal-title" id="memo-modal-title">メモ</div>
+    <div class="modal-sub" id="memo-modal-sub">実物の写真とメモを記録できます</div>
+
+    <div class="photo-section" id="photo-section"></div>
+    <input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none">
+
+    <textarea class="modal-textarea" id="memo-textarea" placeholder="例：渋谷ロフトで見かけた／6/20購入済み"></textarea>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeMemoModal()">キャンセル</button>
+      <button class="modal-btn save" onclick="saveMemoModal()">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="photo-viewer-overlay" id="photo-viewer">
+  <div class="photo-viewer-close" onclick="closePhotoViewer()">✕</div>
+  <img class="photo-viewer-img" id="photo-viewer-img" src="">
+</div>
+
+<div class="modal-overlay" id="stats-modal">
+  <div class="modal-sheet">
+    <div class="modal-title">📊 コレクション統計</div>
+    <div class="modal-sub">地方別・キャラ別の進捗をひと目で確認できます</div>
+    <div class="stat-scroll" id="stats-content"></div>
+    <div class="modal-actions">
+      <button class="modal-btn save" style="width:100%;" onclick="closeStatsModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal-sheet">
+    <div class="modal-title">⚙️ 設定・バックアップ</div>
+    <div class="modal-sub">機種変更やSafariのデータ消去に備えて、定期的にバックアップを取ることをおすすめします</div>
+    <div class="settings-section">
+      <div class="settings-label">📤 バックアップを書き出す</div>
+      <div class="settings-desc">チェック状態・メモ・写真・欲しいリストを1つのファイルに保存します</div>
+      <button class="modal-btn save" style="width:100%;margin-top:8px;" onclick="exportBackup()">ファイルを書き出す</button>
+    </div>
+    <div class="settings-section">
+      <div class="settings-label">📥 バックアップを読み込む</div>
+      <div class="settings-desc">書き出したファイルを選んで復元します（今のデータは上書きされます）</div>
+      <label class="modal-btn cancel" style="width:100%;margin-top:8px;display:block;box-sizing:border-box;" for="backup-file-input">ファイルを選ぶ</label>
+      <input type="file" id="backup-file-input" accept="application/json" style="display:none">
+    </div>
+    <div class="settings-section">
+      <div class="settings-label">💾 現在の保存容量</div>
+      <div class="settings-desc" id="storage-usage-text">計算中…</div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" style="width:100%" onclick="closeSettingsModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <a class="bnav-item active" href="index.html"><span class="bnav-icon">✅</span>コレクション</a>
+  <a class="bnav-item" href="shops.html"><span class="bnav-icon">🗺️</span>店舗・イベント</a>
+</nav>
+<script>
+const CHARS=[{id:'c',short:'ちい',emoji:'🟠'},{id:'h',short:'ハチ',emoji:'🔵'},{id:'u',short:'うさぎ',emoji:'🩷'}];
+const EXTRA_CHARS=[{id:'m',short:'モモ',emoji:'🐿️'},{id:'k',short:'くり',emoji:'🌰'},{id:'r',short:'ラッコ',emoji:'🦦'},{id:'s',short:'シーサー',emoji:'🦁'},{id:'f',short:'古本屋',emoji:'📚'},{id:'o',short:'オデ',emoji:'👹'},{id:'b',short:'カブト',emoji:'🪲'},{id:'mu',short:'むちゃう',emoji:'😈'}];
+const ALL_CHARS=[...CHARS,...EXTRA_CHARS];
+function charsFor(pref,item){
+  if(item&&item.chars) return ALL_CHARS.filter(c=>item.chars.includes(c.id));
+  if(pref&&pref.chars) return ALL_CHARS.filter(c=>pref.chars.includes(c.id));
+  return CHARS;
+}
+const REGIONS=[
+  {id:'hokkaido',name:'北海道・東北',prefs:[
+    {name:'北海道',items:[{n:'北海道',t:'kh'},{n:'ラベンダー',t:'kh'},{n:'メロン',t:'kh'},{n:'シマエナガ',t:'kh'},{n:'くま',t:'kh'},{n:'さっぽろテレビ塔',t:'kh'},{n:'小樽運河',t:'kh'},{n:'北海道',t:'mas'},{n:'ラベンダー',t:'mas'},{n:'メロン',t:'mas'}]},
+    {name:'青森',items:[{n:'りんご',t:'kh'},{n:'ねぶた祭',t:'kh'},{n:'りんご',t:'mas'},{n:'ねぶた祭',t:'mas'}]},
+    {name:'岩手',items:[{n:'わんこそば',t:'kh'},{n:'銀河鉄道',t:'kh'},{n:'わんこそば',t:'mas'}]},
+    {name:'宮城',items:[{n:'伊達政宗',t:'kh'},{n:'笹かま',t:'kh'},{n:'こけし',t:'kh'},{n:'伊達政宗',t:'mas'},{n:'笹かま',t:'mas'}]},
+    {name:'秋田',items:[{n:'秋田犬',t:'kh'},{n:'なまはげ',t:'kh'},{n:'竿燈まつり',t:'kh'},{n:'秋田犬',t:'mas'}]},
+    {name:'山形',items:[{n:'さくらんぼ',t:'kh'},{n:'米沢牛',t:'kh'},{n:'花笠まつり',t:'kh'},{n:'だだちゃ豆',t:'kh'},{n:'さくらんぼ',t:'mas'}]},
+    {name:'福島',items:[{n:'赤べこ',t:'kh'},{n:'ハワイアン',t:'kh'},{n:'白虎隊',t:'kh'},{n:'桃',t:'kh'},{n:'赤べこ',t:'mas'}]}
+  ]},
+  {id:'kanto',name:'関東',prefs:[
+    {name:'茨城',items:[{n:'黄門様',t:'kh'},{n:'水戸納豆',t:'kh'},{n:'黄門様',t:'mas'}]},
+    {name:'栃木',items:[{n:'スカイベリー',t:'kh'},{n:'藤の花',t:'kh'},{n:'三猿',t:'kh'},{n:'栃木レモン',t:'kh'},{n:'スカイベリー',t:'mas'}]},
+    {name:'群馬',items:[{n:'草津温泉',t:'kh'},{n:'だるま',t:'kh'},{n:'焼きまんじゅう',t:'kh'},{n:'だるま',t:'mas'}]},
+    {name:'埼玉',items:[{n:'さつまいも',t:'kh'},{n:'深谷ねぎ',t:'kh'},{n:'さつまいも',t:'mas'},{n:'深谷ねぎ（靴下）',t:'mas'}]},
+    {name:'千葉',items:[{n:'落花生',t:'kh'},{n:'梨',t:'kh'},{n:'行徳みこし',t:'kh'},{n:'落花生',t:'mas'}]},
+    {name:'東京',items:[{n:'雷門',t:'kh'},{n:'東京パンダ',t:'kh'},{n:'スカイツリー',t:'kh'},{n:'東京タワー',t:'kh'},{n:'東京駅丸の内',t:'kh'},{n:'雷門',t:'mas'},{n:'東京パンダ',t:'mas'},{n:'スカイツリー',t:'mas'},{n:'東京タワー',t:'mas'}]},
+    {name:'神奈川',items:[{n:'箱根温泉まんじゅう',t:'kh'},{n:'横浜金の豚',t:'kh'},{n:'鎌倉大仏',t:'kh'},{n:'寄木細工',t:'kh'},{n:'黒たまご',t:'kh'},{n:'カンフー',t:'kh'},{n:'横浜中華街',t:'mas'},{n:'鎌倉大仏',t:'mas'},{n:'黒たまご（靴下）',t:'mas'}]}
+  ]},
+  {id:'chubu',name:'中部',prefs:[
+    {name:'新潟',items:[{n:'笹団子',t:'kh'},{n:'トキ',t:'kh'},{n:'笹団子',t:'mas'}]},
+    {name:'富山',items:[{n:'ホタルイカ',t:'kh'},{n:'ホタルイカ',t:'mas'}]},
+    {name:'石川',items:[{n:'兼六園',t:'kh'},{n:'兼六園',t:'mas'}]},
+    {name:'福井',items:[{n:'恐竜',t:'kh'},{n:'恐竜',t:'mas'}]},
+    {name:'山梨',items:[{n:'ぶどう',t:'kh'},{n:'富士山',t:'kh'},{n:'富士山',t:'mas'}]},
+    {name:'長野',items:[{n:'信州りんご',t:'kh'},{n:'信州オコジョ',t:'kh'},{n:'信州りんご',t:'mas'}]},
+    {name:'岐阜',items:[{n:'合掌造り',t:'kh'},{n:'さるぼぼ',t:'kh'},{n:'さるぼぼ',t:'mas'}]},
+    {name:'静岡',items:[{n:'お茶',t:'kh'},{n:'みかん',t:'kh'},{n:'うなぎ',t:'kh'},{n:'いちご',t:'kh'},{n:'次郎長',t:'kh'},{n:'富士山・静岡',t:'kh'},{n:'桜えび',t:'kh'},{n:'お茶',t:'mas'},{n:'富士山・静岡',t:'mas'},{n:'いちご（靴下）',t:'mas'}]},
+    {name:'愛知',items:[{n:'しゃちほこ',t:'kh'},{n:'小倉トースト',t:'kh'},{n:'しゃちほこ',t:'mas'}]},
+    {name:'三重',items:[{n:'真珠',t:'kh'},{n:'伊勢エビ',t:'kh'},{n:'伊勢エビ',t:'mas'}]}
+  ]},
+  {id:'kinki',name:'関西',prefs:[
+    {name:'滋賀',items:[{n:'琵琶湖',t:'kh'},{n:'彦根城',t:'kh'},{n:'忍者・滋賀',t:'kh'},{n:'信楽たぬき',t:'kh'},{n:'琵琶湖',t:'mas'}]},
+    {name:'京都',items:[{n:'八ツ橋',t:'kh'},{n:'新撰組',t:'kh'},{n:'伏見稲荷',t:'kh'},{n:'抹茶ソフト',t:'kh'},{n:'金閣寺',t:'kh'},{n:'京都タワー',t:'kh'},{n:'八ツ橋',t:'mas'},{n:'伏見稲荷',t:'mas'},{n:'舞妓はん（巾着）',t:'mas'},{n:'伏見稲荷（巾着）',t:'mas'}]},
+    {name:'大阪',items:[{n:'たこ焼き',t:'kh'},{n:'通天閣',t:'kh'},{n:'大阪のおばちゃん',t:'kh'},{n:'大阪城',t:'kh'},{n:'ミックスジュース',t:'kh'},{n:'たこ焼き',t:'mas'},{n:'通天閣',t:'mas'}]},
+    {name:'兵庫',items:[{n:'神戸セーラー',t:'kh'},{n:'神戸中華街',t:'kh'},{n:'淡路玉ねぎ',t:'kh'},{n:'神戸ポートタワー',t:'kh'},{n:'姫路千姫',t:'kh'},{n:'コウノトリ',t:'kh'},{n:'神戸セーラー',t:'mas'}]},
+    {name:'奈良',items:[{n:'鹿',t:'kh'},{n:'大仏',t:'kh'},{n:'鹿',t:'mas'}]},
+    {name:'和歌山',items:[{n:'パンダ',t:'kh'},{n:'みかん',t:'kh'},{n:'パンダ',t:'mas'}]}
+  ]},
+  {id:'chugoku',name:'中国・四国',prefs:[
+    {name:'鳥取',items:[{n:'いなばの白うさぎ',t:'kh'},{n:'いなばの白うさぎ',t:'mas'}]},
+    {name:'島根',items:[{n:'縁結び',t:'kh'},{n:'いなばの白うさぎ',t:'kh'},{n:'縁結び',t:'mas'}]},
+    {name:'岡山',items:[{n:'桃太郎',t:'kh'},{n:'瀬戸内レモン',t:'kh'},{n:'桃太郎',t:'mas'}]},
+    {name:'広島',items:[{n:'もみじ饅頭',t:'kh'},{n:'お好み焼き',t:'kh'},{n:'宮島の鹿',t:'kh'},{n:'しゃもじ',t:'kh'},{n:'尾道ラーメン',t:'kh'},{n:'瀬戸内レモン',t:'kh'},{n:'もみじ饅頭',t:'mas'},{n:'お好み焼き',t:'mas'}]},
+    {name:'山口',items:[{n:'ふく',t:'kh'},{n:'瀬戸内レモン',t:'kh'},{n:'ふく',t:'mas'}]},
+    {name:'香川',items:[{n:'さぬきうどん',t:'kh'},{n:'瀬戸内レモン',t:'kh'},{n:'さぬきうどん',t:'mas'}]},
+    {name:'愛媛',items:[{n:'みかん',t:'kh'},{n:'瀬戸内レモン',t:'kh'},{n:'みかん',t:'mas'}]},
+    {name:'高知',items:[{n:'坂本龍馬',t:'kh'},{n:'坂本龍馬',t:'mas'}]},
+    {name:'徳島',items:[{n:'うずしお',t:'kh'},{n:'瀬戸内レモン',t:'kh'},{n:'うずしお',t:'mas'}]}
+  ]},
+  {id:'kyushu',name:'九州・沖縄',prefs:[
+    {name:'福岡',items:[{n:'あまおう',t:'kh'},{n:'明太子',t:'kh'},{n:'とんこつラーメン',t:'kh'},{n:'バナナの叩き売り',t:'kh'},{n:'にわか',t:'kh'},{n:'明太子',t:'mas'},{n:'とんこつラーメン',t:'mas'}]},
+    {name:'佐賀',items:[{n:'バルーン',t:'kh'},{n:'バルーン',t:'mas'}]},
+    {name:'長崎',items:[{n:'カステラ',t:'kh'},{n:'カステラ',t:'mas'}]},
+    {name:'熊本',items:[{n:'熊本城',t:'kh'},{n:'辛子れんこん',t:'kh'},{n:'すいか',t:'kh'},{n:'熊本城',t:'mas'}]},
+    {name:'大分',items:[{n:'温泉',t:'kh'},{n:'温泉',t:'mas'}]},
+    {name:'宮崎',items:[{n:'マンゴー',t:'kh'},{n:'サーフィン',t:'kh'},{n:'マンゴー',t:'mas'}]},
+    {name:'鹿児島',items:[{n:'桜島',t:'kh'},{n:'氷しろくま',t:'kh'},{n:'黒豚',t:'kh'},{n:'芋焼酎',t:'kh'},{n:'アマミノクロウサギ',t:'kh'},{n:'桜島',t:'mas'},{n:'黒豚',t:'mas'}]},
+    {name:'沖縄',items:[{n:'シーサー',t:'kh'},{n:'ジンベイザメ',t:'kh'},{n:'紅芋タルト',t:'kh'},{n:'シーサー',t:'mas'},{n:'ジンベイザメ',t:'mas'}]}
+  ]},
+  {id:'nationwide',name:'全国共通・その他',prefs:[
+    {name:'温泉地限定',items:[{n:'温泉',t:'kh'},{n:'温泉',t:'mas'}]},
+    {name:'リゾート限定',items:[{n:'スキー',t:'kh'},{n:'スノボー',t:'kh'},{n:'スキー',t:'mas'},{n:'スノボー',t:'mas'}]},
+    {name:'新幹線・鉄道',items:[{n:'はやぶさ',t:'kh'},{n:'E7',t:'kh'},{n:'N700S（東海・西日本）',t:'kh'},{n:'Dr.Yellow（東海・西日本）',t:'kh'}]},
+    {name:'東京駅一番街',items:[{n:'ちいかわらんどTOKYO Station 1周年限定',t:'kh'}]},
+    {name:'空港限定',items:[{n:'パイロット',t:'kh'},{n:'パイロット',t:'mas'}]},
+    {name:'東京スカイツリー',items:[{n:'スカイツリー（がま口）',t:'mas'},{n:'スカイツリー（ティッシュケース）',t:'mas'},{n:'スカイツリー（ポーチ）',t:'mas'}]}
+  ]},
+  {id:'overseas',name:'海外',prefs:[
+    {name:'香港',items:[{n:'エッグワッフル',t:'kh'},{n:'ビクトリアハーバー',t:'kh'},{n:'カンフー（香港）',t:'kh'},{n:'エッグワッフル（靴下）',t:'mas'}]},
+    {name:'マカオ',items:[{n:'セントポール',t:'kh'},{n:'エッグタルト',t:'kh'},{n:'アズレージョ',t:'kh'},{n:'セントポール（靴下）',t:'mas'}]},
+    {name:'オーストラリア',items:[{n:'コアラ',t:'kh'},{n:'カンガルー',t:'kh'}]}
+  ]},
+  {id:'permashop',name:'常設店限定',prefs:[
+    {name:'ちいかわパーク（池袋）',items:[
+      {n:'ぷわころぬいぐるみS（全8種）',t:'mas',chars:['c','h','u','m','k','r','s','f']},
+      {n:'ぷわころマスコット（全8種）',t:'mas',chars:['c','h','u','m','k','r','s','f']},
+      {n:'ポップコーンバケツ（全3種）',t:'kh',chars:['c','h','u']},
+      {n:'Tシャツ メインビジュアル（全3色）',t:'kh',chars:['c','h','u']},
+      {n:'ポケッタブルエコバッグ（全4種）',t:'kh'},
+      {n:'記念メダル（全9種・刻印可）',t:'kh',chars:['c','h','u','m','k','r','s','f']},
+      {n:'メダルケース（全3種）',t:'kh',chars:['c','h','u']},
+      {n:'カスタムキーホルダー（名入れ・全8種）',t:'kh',chars:['c','h','u','m','k','r','s','f']},
+      {n:'グランドオープニング記念グッズ（全4種）',t:'kh',chars:['c','h','u','m']},
+      {n:'囚人姿スプーンフォーク（全4種）',t:'kh',chars:['c','h','u','o']},
+      {n:'メラミンカップ（ちい・ハチ・うさぎ セット）',t:'kh',chars:['c','h','u']},
+      {n:'メラミンカップ（ラッコ・シーサー・くり セット）',t:'kh',chars:['r','s','k']},
+      {n:'メラミンカップ（古本屋・モモンガ セット）',t:'kh',chars:['f','m']},
+      {n:'ミニチャーム（全74種）',t:'mas'},
+      {n:'カチューシャ',t:'mas',chars:['c','h','u']},
+      {n:'うきうきぬいぐるみキャップ',t:'mas',chars:['c','h','u']},
+      {n:'ポシェット（うさぎショップ）',t:'kh',chars:['u']},
+      {n:'おかおリュック（うさぎショップ）',t:'kh',chars:['u']},
+      {n:'ホログラム缶バッジ（ハチワレショップ）',t:'kh',chars:['h']},
+      {n:'キルティングトートバッグ（ハチワレショップ）',t:'kh',chars:['h']},
+      {n:'ミニマスコットキーリング（ちいかわショップ）',t:'mas',chars:['c']},
+      {n:'むちゃうマン＆オデ くったりぬいぐるみ',t:'mas',chars:['mu','o']}
+    ]},
+    {name:'ちいかわレストラン',items:[
+      {n:'なんか大きい討伐成功タンブラー',t:'kh',chars:['c','h','u']},
+      {n:'ハチワレのピーマン肉詰め皿',t:'kh',chars:['h']},
+      {n:'さすまた風フォーク（全2種）',t:'kh'},
+      {n:'お子様ランチ プラワンプレート',t:'kh',chars:['c','h','u']},
+      {n:'カトラリーセット（箸・スプーン・フォーク）',t:'kh'},
+      {n:'ミニソフビフィギュアコレクション',t:'mas',chars:['c','h','u','m','k']},
+      {n:'キッチン担当マスコット（くりまんじゅう）',t:'mas',chars:['k']},
+      {n:'ホール担当マスコット（ラッコ）',t:'mas',chars:['r']},
+      {n:'オリジナルショッパー（特典）',t:'kh',chars:['c','h','u']}
+    ]},
+    {name:'ちいかわベーカリー（原宿）',items:[
+      {n:'パンみたいなもちもちマスコット（全9種）',t:'mas',chars:['c','h','u','m','o','b','k']},
+      {n:'クッキー缶（転んだ）',t:'kh',chars:['c','h','u']},
+      {n:'トレー',t:'kh',chars:['c','h','u']},
+      {n:'素焼きコースター（ロゴ）',t:'kh'},
+      {n:'素焼きコースター（転んだ）',t:'kh',chars:['c','h','u']},
+      {n:'素焼きコースター（パンなみんな）',t:'kh',chars:['c','h','u','m']},
+      {n:'木蓋付き保冷・保温タンブラー（パン屋さん）',t:'kh',chars:['c','h','u']},
+      {n:'木蓋付き保冷・保温タンブラー（サンド）',t:'kh',chars:['c','h','u']},
+      {n:'ワンプッシュボトル（パンなみんな）',t:'kh',chars:['c','h','u','m']},
+      {n:'Tシャツ 転びまくるトリオ',t:'kh',chars:['c','h','u']},
+      {n:'Tシャツ 窓からチラッと',t:'kh',chars:['c','h','u']},
+      {n:'Tシャツ CHIIKAWA BAKERY',t:'kh'},
+      {n:'トートバッグ 窓からチラッと',t:'kh',chars:['c','h','u']},
+      {n:'トートバッグ CHIIKAWA BAKERY',t:'kh'},
+      {n:'サコッシュ 転びまくるトリオ',t:'kh',chars:['c','h','u']},
+      {n:'撥水マグカップ',t:'kh',chars:['c','h','u']},
+      {n:'ハンドタオル',t:'kh',chars:['c','h','u']}
+    ]},
+    {name:'ちいかわラーメン 豚',items:[
+      {n:'どんぶりミニ（ちいかわ）',t:'kh',chars:['c']},
+      {n:'どんぶり小（ハチワレ）',t:'kh',chars:['h']},
+      {n:'どんぶり大（うさぎ）',t:'kh',chars:['u']},
+      {n:'冷やし中華皿（モモンガ）',t:'kh',chars:['m']},
+      {n:'どんぶり味噌（くりまんじゅう）',t:'kh',chars:['k']},
+      {n:'ジョッキグラス',t:'kh',chars:['c','h','u']},
+      {n:'お冷グラス',t:'kh',chars:['c','h','u']},
+      {n:'フェイスタオル',t:'kh',chars:['c','h','u']},
+      {n:'リストバンド',t:'kh',chars:['c','h','u']},
+      {n:'店員さんなマスコット（ちいかわ）',t:'mas',chars:['c']},
+      {n:'店員さんなマスコット（ハチワレ）',t:'mas',chars:['h']},
+      {n:'店員さんなマスコット（うさぎ）',t:'mas',chars:['u']},
+      {n:'メラミンボウル',t:'kh',chars:['c','h','u']},
+      {n:'Tシャツ ホワイト（S〜XL）',t:'kh',chars:['c','h','u']},
+      {n:'バンダナ ホワイト',t:'kh',chars:['c','h','u']}
+    ]},
+    {name:'ちいかわもぐもぐ本舗（京都伏見稲荷）',items:[
+      {n:'稲荷なマスコット（くりまんじゅう）',t:'mas',chars:['k']},
+      {n:'Tシャツ 伏見稲荷な（ちいかわ）',t:'kh',chars:['c']},
+      {n:'Tシャツ 伏見稲荷な（ハチワレ）',t:'kh',chars:['h']},
+      {n:'Tシャツ 伏見稲荷な（うさぎ）',t:'kh',chars:['u']},
+      {n:'ZIPパーカー 伏見稲荷な みんな',t:'kh',chars:['c','h','u']},
+      {n:'和紙ステッカー（和装なくりまんじゅう）',t:'kh',chars:['k']},
+      {n:'小風呂敷 和装なちいかわとうさぎ',t:'kh',chars:['c','u']}
+    ]},
+    {name:'ちいかわもぐもぐ本舗（川越）',items:[
+      {n:'おいもなぬいぐるみ（ちいかわ）',t:'mas',chars:['c']},
+      {n:'おいもなぬいぐるみ（ハチワレ）',t:'mas',chars:['h']},
+      {n:'おいもなぬいぐるみ（うさぎ）',t:'mas',chars:['u']},
+      {n:'おいもなマスコット（ちいかわ）',t:'mas',chars:['c']},
+      {n:'おいもなマスコット（ハチワレ）',t:'mas',chars:['h']},
+      {n:'おいもなマスコット（うさぎ）',t:'mas',chars:['u']},
+      {n:'トレーディング犬張り子アクリルチャーム（全8種）',t:'kh'},
+      {n:'マグカップ（さつまいも）',t:'kh',chars:['c','h','u']},
+      {n:'マグカップ（お菓子）',t:'kh',chars:['c','h','u']},
+      {n:'豆皿',t:'kh',chars:['c','h','u']},
+      {n:'ミニ提灯マグネット（お菓子）',t:'kh',chars:['c','h','u']},
+      {n:'ミニ提灯マグネット（人力車）',t:'kh',chars:['c','h','u']},
+      {n:'メタルチャームキーホルダー（さつまいも）',t:'kh',chars:['c','h','u']},
+      {n:'キャラ撮りスティック（さつまいも）',t:'kh',chars:['c','h','u']}
+    ]},
+    {name:'ちいかわもぐもぐ本舗（小樽）',items:[
+      {n:'小樽店限定グッズ',t:'kh',chars:['c','h','u']}
+    ]},
+    {name:'ちいかわベビーカステラ（小樽）',items:[
+      {n:'小樽限定グッズ',t:'kh',chars:['c','h','u']},
+      {n:'オープン記念ノベルティ',t:'mas',chars:['c','h','u']}
+    ]}
+  ]}
+];
+
+const SK='chiikawa_pwa_v1';
+let checked={},openState={},memos={},photos={},wishlist={},currentRegion='all',currentFilter='all',searchQuery='';
+let activeMemoKey=null,pendingPhotoData=null,pendingPhotoRemoved=false;
+
+function load(){try{const s=localStorage.getItem(SK);if(s){const d=JSON.parse(s);checked=d.checked||{};openState=d.openState||{};memos=d.memos||{};photos=d.photos||{};wishlist=d.wishlist||{};}}catch(e){}}
+function save(){
+  try{localStorage.setItem(SK,JSON.stringify({checked,openState,memos,photos,wishlist}));}
+  catch(e){
+    alert('保存容量がいっぱいです。古い写真を削除してから保存してください。');
+  }
+}
+function mk(p,n,t,c){return p+'|'+n+'|'+t+'|'+c;}
+function memoKey(p,n,t){return p+'|'+n+'|'+t;}
+function totalItems(){let t=0;REGIONS.forEach(r=>r.prefs.forEach(p=>p.items.forEach(item=>t+=charsFor(p,item).length)));return t;}
+function qty(key){const v=checked[key];if(v===true)return 1;return v||0;}
+function totalChecked(){return Object.keys(checked).filter(k=>qty(k)>0).length;}
+
+function resizeImage(file, maxSize, cb){
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    const img=new Image();
+    img.onload=()=>{
+      let w=img.width,h=img.height;
+      if(w>h){ if(w>maxSize){h=Math.round(h*maxSize/w);w=maxSize;} }
+      else { if(h>maxSize){w=Math.round(w*maxSize/h);h=maxSize;} }
+      const canvas=document.createElement('canvas');
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      cb(canvas.toDataURL('image/jpeg',0.7));
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderPhotoSection(){
+  const sec=document.getElementById('photo-section');
+  const dataUrl = pendingPhotoRemoved ? null : (pendingPhotoData || photos[activeMemoKey]);
+  if(dataUrl){
+    sec.innerHTML=`<div class="photo-preview-wrap">
+      <img class="photo-preview-img" src="${dataUrl}">
+      <div class="photo-remove-btn" id="photo-remove-btn">✕</div>
+    </div>`;
+    document.getElementById('photo-remove-btn').onclick=()=>{
+      pendingPhotoData=null; pendingPhotoRemoved=true; renderPhotoSection();
+    };
+  } else {
+    sec.innerHTML=`<div class="photo-add-btn" id="photo-add-btn"><span class="icon">📷</span>実物の写真を追加</div>`;
+    document.getElementById('photo-add-btn').onclick=()=>document.getElementById('photo-input').click();
+  }
+}
+
+document.getElementById('photo-input').addEventListener('change',(e)=>{
+  const file=e.target.files[0];
+  if(!file) return;
+  resizeImage(file, 800, (dataUrl)=>{
+    pendingPhotoData=dataUrl; pendingPhotoRemoved=false; renderPhotoSection();
+  });
+  e.target.value='';
+});
+
+function openMemoModal(key, itemLabel){
+  activeMemoKey=key;
+  pendingPhotoData=null; pendingPhotoRemoved=false;
+  document.getElementById('memo-modal-title').textContent='📝 '+itemLabel;
+  document.getElementById('memo-textarea').value=memos[key]||'';
+  renderPhotoSection();
+  document.getElementById('memo-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('memo-textarea').focus(),100);
+}
+function closeMemoModal(){
+  document.getElementById('memo-modal').classList.remove('open');
+  activeMemoKey=null; pendingPhotoData=null; pendingPhotoRemoved=false;
+}
+function saveMemoModal(){
+  const val=document.getElementById('memo-textarea').value.trim();
+  if(!activeMemoKey){closeMemoModal();return;}
+  if(val) memos[activeMemoKey]=val; else delete memos[activeMemoKey];
+  if(pendingPhotoRemoved) delete photos[activeMemoKey];
+  else if(pendingPhotoData) photos[activeMemoKey]=pendingPhotoData;
+  save();
+  closeMemoModal();
+  render();
+}
+function openPhotoViewer(src){
+  document.getElementById('photo-viewer-img').src=src;
+  document.getElementById('photo-viewer').classList.add('open');
+}
+function closePhotoViewer(){
+  document.getElementById('photo-viewer').classList.remove('open');
+}
+
+function openSettingsModal(){
+  document.getElementById('settings-modal').classList.add('open');
+  updateStorageUsageText();
+}
+function closeSettingsModal(){
+  document.getElementById('settings-modal').classList.remove('open');
+}
+
+function openStatsModal(){
+  renderStats();
+  document.getElementById('stats-modal').classList.add('open');
+}
+function closeStatsModal(){
+  document.getElementById('stats-modal').classList.remove('open');
+}
+
+function barColor(pct){
+  if(pct>=100) return 'var(--green)';
+  if(pct>=50) return 'var(--salmon)';
+  return 'var(--blue)';
+}
+
+function renderStats(){
+  const el=document.getElementById('stats-content');
+
+  // --- 全体サマリー ---
+  const totalT=totalItems();
+  const totalC=totalChecked();
+  const totalPct=totalT?Math.round(totalC/totalT*100):0;
+  let totalItemTypes=0,completedItemTypes=0;
+  REGIONS.forEach(r=>r.prefs.forEach(p=>p.items.forEach(item=>{
+    totalItemTypes++;
+    if(charsFor(p,item).every(c=>qty(mk(p.name,item.n,item.t,c.id))>0)) completedItemTypes++;
+  })));
+  let totalPieces=0;
+  Object.keys(checked).forEach(k=>{totalPieces+=qty(k);});
+  let wishCount=Object.keys(wishlist).filter(k=>wishlist[k]).length;
+
+  let html='';
+  html+=`<div class="stat-summary-grid">
+    <div class="stat-summary-card"><div class="stat-summary-num">${totalPct}%</div><div class="stat-summary-label">全体達成率</div></div>
+    <div class="stat-summary-card"><div class="stat-summary-num">${totalPieces}</div><div class="stat-summary-label">所持総数</div></div>
+    <div class="stat-summary-card"><div class="stat-summary-num">${wishCount}</div><div class="stat-summary-label">★欲しい中</div></div>
+  </div>`;
+
+  // --- キャラ別所持数 ---
+  const charCounts={};
+  ALL_CHARS.forEach(c=>charCounts[c.id]=0);
+  Object.keys(checked).forEach(k=>{
+    const parts=k.split('|');
+    const cid=parts[3];
+    if(charCounts.hasOwnProperty(cid)) charCounts[cid]+=qty(k);
+  });
+  html+='<div class="stat-block"><div class="stat-block-title">🧸 キャラ別 所持数</div><div class="stat-char-row">';
+  ALL_CHARS.filter(c=>charCounts[c.id]>0||CHARS.includes(c)).forEach(c=>{
+    html+=`<div class="stat-char-card"><div class="stat-char-emoji">${c.emoji}</div><div class="stat-char-num">${charCounts[c.id]}</div><div class="stat-char-label">${c.short}</div></div>`;
+  });
+  html+='</div></div>';
+
+  // --- 地方別コンプリート率 ---
+  html+='<div class="stat-block"><div class="stat-block-title">🗾 地方別 達成率</div>';
+  const regionStats=REGIONS.map(region=>{
+    let c=0,t=0;
+    region.prefs.forEach(p=>p.items.forEach(item=>charsFor(p,item).forEach(ch=>{
+      t++;
+      if(qty(mk(p.name,item.n,item.t,ch.id))>0)c++;
+    })));
+    const pct=t?Math.round(c/t*100):0;
+    return{name:region.name,pct,c,t};
+  });
+  regionStats.forEach(r=>{
+    html+=`<div class="stat-row">
+      <div class="stat-label">${r.name}</div>
+      <div class="stat-bar-wrap"><div class="stat-bar-fill" style="width:${r.pct}%;background:${barColor(r.pct)}"></div></div>
+      <div class="stat-pct">${r.pct}%</div>
+    </div>`;
+  });
+  html+='</div>';
+
+  // --- ベスト/ワースト都道府県 ---
+  const prefStats=[];
+  REGIONS.forEach(region=>region.prefs.forEach(pref=>{
+    let c=0,t=0;
+    pref.items.forEach(item=>charsFor(pref,item).forEach(ch=>{t++;if(qty(mk(pref.name,item.n,item.t,ch.id))>0)c++;}));
+    prefStats.push({name:pref.name,pct:t?Math.round(c/t*100):0,c,t});
+  }));
+  const sorted=[...prefStats].sort((a,b)=>b.pct-a.pct);
+  const best=sorted.slice(0,3).filter(p=>p.pct>0);
+  const worst=[...prefStats].filter(p=>p.pct<100).sort((a,b)=>a.pct-b.pct).slice(0,3);
+  html+='<div class="stat-block"><div class="stat-block-title">🏆 進捗ランキング</div><div class="stat-best-worst">';
+  if(best.length>0){
+    html+='<b>好調な都道府県：</b><br>'+best.map(p=>`${p.name}（${p.pct}%）`).join('　/　')+'<br><br>';
+  }
+  if(worst.length>0){
+    html+='<b>これから狙うなら：</b><br>'+worst.map(p=>`${p.name}（${p.pct}%）`).join('　/　');
+  }
+  html+='</div></div>';
+
+  el.innerHTML=html;
+}
+function updateStorageUsageText(){
+  try{
+    const raw=localStorage.getItem(SK)||'';
+    const bytes=new Blob([raw]).size;
+    const kb=(bytes/1024).toFixed(0);
+    const mb=(bytes/1024/1024).toFixed(2);
+    document.getElementById('storage-usage-text').textContent=
+      bytes<1024*1024 ? `約${kb} KB 使用中（端末の上限は通常5MB程度）` : `約${mb} MB 使用中（端末の上限は通常5MB程度。写真が多いと上限に近づきます）`;
+  }catch(e){
+    document.getElementById('storage-usage-text').textContent='取得できませんでした';
+  }
+}
+function exportBackup(){
+  try{
+    const data={checked,openState,memos,photos,wishlist,exportedAt:new Date().toISOString(),app:'chiikawa-collection'};
+    const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    const dateStr=new Date().toISOString().slice(0,10);
+    a.href=url;
+    a.download=`chiikawa-backup-${dateStr}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }catch(e){
+    alert('書き出しに失敗しました。');
+  }
+}
+function importBackup(file){
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data||typeof data!=='object'){throw new Error('invalid');}
+      const ok=confirm('現在のデータを上書きして復元します。よろしいですか？');
+      if(!ok)return;
+      checked=data.checked||{};
+      openState=data.openState||{};
+      memos=data.memos||{};
+      photos=data.photos||{};
+      wishlist=data.wishlist||{};
+      save();
+      closeSettingsModal();
+      buildTabs();
+      render();
+      alert('復元しました！');
+    }catch(err){
+      alert('このファイルは読み込めませんでした。正しいバックアップファイルか確認してください。');
+    }
+  };
+  reader.readAsText(file);
+}
+document.getElementById('backup-file-input').addEventListener('change',(e)=>{
+  const file=e.target.files[0];
+  if(file) importBackup(file);
+  e.target.value='';
+});
+document.getElementById('settings-modal').addEventListener('click',(e)=>{
+  if(e.target.id==='settings-modal') closeSettingsModal();
+});
+document.getElementById('stats-modal').addEventListener('click',(e)=>{
+  if(e.target.id==='stats-modal') closeStatsModal();
+});
+
+function updateProgress(){
+  const t=totalItems(),c=totalChecked(),pct=t?Math.round(c/t*100):0;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-num').textContent=c+'個入手済み';
+  document.getElementById('prog-total').textContent='全'+t+'個中 ('+pct+'%)';
+}
+
+function buildTabs(){
+  const wrap=document.getElementById('region-tabs');wrap.innerHTML='';
+  const add=(id,label)=>{const b=document.createElement('button');b.className='tab'+(currentRegion===id?' active':'');b.textContent=label;b.onclick=()=>{currentRegion=id;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));b.classList.add('active');render();};wrap.appendChild(b);};
+  add('all','すべて');REGIONS.forEach(r=>add(r.id,r.name));
+}
+
+function setFilter(f,btn){currentFilter=f;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');render();}
+
+function isPrefComplete(p){return p.items.every(i=>charsFor(p,i).every(c=>qty(mk(p.name,i.n,i.t,c.id))>0));}
+function hasPrefUnchecked(p){return p.items.some(i=>charsFor(p,i).some(c=>qty(mk(p.name,i.n,i.t,c.id))===0));}
+function prefCounts(p){let c=0,t=0;p.items.forEach(i=>charsFor(p,i).forEach(ch=>{t++;if(qty(mk(p.name,i.n,i.t,ch.id))>0)c++;}));return{c,t};}
+
+function updateHeader(pref,sec){
+  const complete=isPrefComplete(pref);
+  const{c,t}=prefCounts(pref);
+  const hdr=sec.querySelector('.pref-header');
+  hdr.className='pref-header'+(complete?' complete':'');
+  const badge=sec.querySelector('.pref-badge');
+  badge.className='pref-badge'+(complete?' done':'');
+  badge.textContent=complete?'✓ コンプリート':c+'/'+t;
+  updateProgress();
+}
+
+function prefHasWish(p){return p.items.some(i=>charsFor(p,i).some(c=>!!wishlist[mk(p.name,i.n,i.t,c.id)]));}
+function prefHasTrade(p){return p.items.some(i=>charsFor(p,i).some(c=>qty(mk(p.name,i.n,i.t,c.id))>1));}
+
+function buildItemRow(pref, item, sec, updateHeaderFn){
+  const row=document.createElement('div');row.className='item';
+  const badge=item.t==='kh'?'<span class="type-badge type-kh">KH</span>':'<span class="type-badge type-mas">マスコット</span>';
+  const mKey=memoKey(pref.name,item.n,item.t);
+  const hasMemo=!!memos[mKey];
+  const photoSrc=photos[mKey];
+  const thumbHtml = photoSrc ? `<img class="item-thumb" src="${photoSrc}" data-photo="${photoSrc}">` : '';
+  const itemChars=charsFor(pref,item);
+  const cellW=itemChars.length>3?40:52;
+  row.innerHTML=`<div class="item-label">${thumbHtml}<span>${item.n}${badge}</span></div><div class="memo-btn${hasMemo?' has-memo':''}" data-mkey="${mKey}" data-label="${pref.name} ${item.n}">📝</div><div class="char-cells">${itemChars.map((c,i)=>{const key=mk(pref.name,item.n,item.t,c.id);const n=qty(key);const wished=!!wishlist[key];const starHtml=n===0?`<span class="wish-star${wished?' active':''}" data-wkey="${key}">★</span>`:'';return`<div class="char-cell" data-key="${key}" data-ci="${i}" style="width:${cellW}px"><span class="char-emoji">${c.emoji}</span><div class="check-ring${n>0?' on-'+i:''}">${n>0?n:''}</div>${starHtml}${n>1?`<span class="qty-badge">x${n}</span>`:''}</div>`;}).join('')}</div>`;
+  const thumbEl=row.querySelector('.item-thumb');
+  if(thumbEl) thumbEl.addEventListener('click',(e)=>{e.stopPropagation();openPhotoViewer(thumbEl.dataset.photo);});
+  row.querySelector('.memo-btn').addEventListener('click',(e)=>{
+    const btn=e.currentTarget;
+    openMemoModal(btn.dataset.mkey, btn.dataset.label);
+  });
+  row.querySelectorAll('.wish-star').forEach(star=>{
+    star.addEventListener('click',(e)=>{
+      e.stopPropagation();
+      const key=star.dataset.wkey;
+      wishlist[key]=!wishlist[key];
+      save();
+      star.classList.toggle('active', !!wishlist[key]);
+    });
+  });
+  row.querySelectorAll('.char-cell').forEach(cell=>{
+    let pressTimer=null,longPressed=false;
+    const refreshCell=()=>{
+      const key=cell.dataset.key,ci=cell.dataset.ci;
+      const n=qty(key);
+      const ring=cell.querySelector('.check-ring');
+      ring.className='check-ring'+(n>0?' on-'+ci:'');
+      ring.textContent=n>0?n:'';
+      ring.classList.add('pop');setTimeout(()=>ring.classList.remove('pop'),200);
+      const existingBadge=cell.querySelector('.qty-badge');
+      if(existingBadge) existingBadge.remove();
+      if(n>1){
+        const badge=document.createElement('span');
+        badge.className='qty-badge';
+        badge.textContent='x'+n;
+        cell.appendChild(badge);
+      }
+      const starEl=cell.querySelector('.wish-star');
+      if(n>0){
+        if(wishlist[key]){delete wishlist[key];}
+        if(starEl) starEl.remove();
+      }else{
+        if(!starEl){
+          const star=document.createElement('span');
+          star.className='wish-star'+(wishlist[key]?' active':'');
+          star.textContent='★';
+          star.dataset.wkey=key;
+          star.addEventListener('click',(e)=>{
+            e.stopPropagation();
+            wishlist[key]=!wishlist[key];save();
+            star.classList.toggle('active', !!wishlist[key]);
+          });
+          cell.insertBefore(star, cell.firstChild);
+        }
+      }
+      if(updateHeaderFn) updateHeaderFn();
+    };
+    cell.addEventListener('touchstart',()=>{
+      longPressed=false;
+      pressTimer=setTimeout(()=>{
+        longPressed=true;
+        const key=cell.dataset.key;
+        checked[key]=0;save();
+        refreshCell();
+      },550);
+    });
+    cell.addEventListener('touchend',()=>{ if(pressTimer) clearTimeout(pressTimer); });
+    cell.addEventListener('touchmove',()=>{ if(pressTimer) clearTimeout(pressTimer); });
+    cell.addEventListener('click',()=>{
+      if(longPressed){ longPressed=false; return; }
+      const key=cell.dataset.key;
+      const current=qty(key);
+      checked[key]=current>=3?0:current+1;
+      save();
+      refreshCell();
+    });
+  });
+  return row;
+}
+
+function render(){
+  if(searchQuery.trim()!==''){ renderSearchResults(); return; }
+  document.getElementById('search-clear').style.display='none';
+  document.getElementById('tabs-wrap-el').style.display='block';
+  document.getElementById('filter-row-el').style.display='flex';
+  const container=document.getElementById('list-container');container.innerHTML='';
+  const regions=currentRegion==='all'?REGIONS:REGIONS.filter(r=>r.id===currentRegion);
+  let any=false;
+  regions.forEach(region=>region.prefs.forEach(pref=>{
+    const complete=isPrefComplete(pref),hasUn=hasPrefUnchecked(pref);
+    if(currentFilter==='checked'&&!complete)return;
+    if(currentFilter==='unchecked'&&!hasUn)return;
+    if(currentFilter==='wish'&&!prefHasWish(pref))return;
+    if(currentFilter==='trade'&&!prefHasTrade(pref))return;
+    any=true;
+    const{c,t}=prefCounts(pref);
+    const isOpen=openState[pref.name]!==false;
+    const sec=document.createElement('div');sec.className='pref-section';
+    const hdr=document.createElement('div');
+    hdr.className='pref-header'+(complete?' complete':'');
+    hdr.innerHTML=`<span class="pref-name">${pref.name}</span><div class="pref-right"><span class="pref-badge${complete?' done':''}">${complete?'✓ コンプリート':c+'/'+t}</span><span class="chevron${isOpen?' open':''}">▼</span></div>`;
+    const wrap=document.createElement('div');wrap.style.display=isOpen?'block':'none';
+    const ch=document.createElement('div');ch.className='col-header';
+    ch.innerHTML=`<div class="col-header-label">デザイン / 種類</div><div class="col-header-chars">${charsFor(pref).map(c=>`<div class="col-header-char" style="width:${charsFor(pref).length>3?40:52}px"><span>${c.emoji}</span><span>${c.short}</span></div>`).join('')}</div>`;
+    wrap.appendChild(ch);
+    let itemsShown=0;
+    pref.items.forEach(item=>{
+      if(currentFilter==='wish'&&!charsFor(pref,item).some(c=>!!wishlist[mk(pref.name,item.n,item.t,c.id)]))return;
+      if(currentFilter==='trade'&&!charsFor(pref,item).some(c=>qty(mk(pref.name,item.n,item.t,c.id))>1))return;
+      itemsShown++;
+      const row=buildItemRow(pref,item,sec,()=>updateHeader(pref,sec));
+      wrap.appendChild(row);
+    });
+    hdr.addEventListener('click',()=>{
+      const nowOpen=wrap.style.display!=='none';
+      wrap.style.display=nowOpen?'none':'block';
+      openState[pref.name]=!nowOpen;save();
+      hdr.querySelector('.chevron').classList.toggle('open',!nowOpen);
+    });
+    if((currentFilter==='wish'||currentFilter==='trade')&&itemsShown===0)return;
+    sec.appendChild(hdr);sec.appendChild(wrap);container.appendChild(sec);
+  }));
+  if(!any)container.innerHTML='<div class="empty-msg">該当するアイテムがありません 🔍</div>';
+  updateProgress();
+}
+
+function renderSearchResults(){
+  document.getElementById('search-clear').style.display='block';
+  document.getElementById('tabs-wrap-el').style.display='none';
+  document.getElementById('filter-row-el').style.display='none';
+  const container=document.getElementById('list-container');container.innerHTML='';
+  const q=searchQuery.trim().toLowerCase();
+  let matches=[];
+  REGIONS.forEach(region=>region.prefs.forEach(pref=>{
+    pref.items.forEach(item=>{
+      if(item.n.toLowerCase().includes(q)) matches.push({pref,item});
+    });
+  }));
+  if(matches.length===0){
+    container.innerHTML=`<div class="empty-msg">「${searchQuery}」に一致するアイテムが見つかりません 🔍<br><span style="font-size:11px">アイテム名の一部で検索してみてください</span></div>`;
+    updateProgress();
+    return;
+  }
+  const grouped={};
+  matches.forEach(m=>{
+    const k=m.pref.name+'__'+m.item.n;
+    if(!grouped[k]) grouped[k]={pref:m.pref,item:m.item};
+  });
+  const sec=document.createElement('div');sec.className='pref-section';
+  const hdr=document.createElement('div');
+  hdr.className='pref-header';
+  hdr.innerHTML=`<span class="pref-name">🔍 検索結果（${Object.keys(grouped).length}件）</span>`;
+  sec.appendChild(hdr);
+  const wrap=document.createElement('div');
+  const ch=document.createElement('div');ch.className='col-header';
+  ch.innerHTML=`<div class="col-header-label">デザイン / 種類</div><div class="col-header-chars">${CHARS.map(c=>`<div class="col-header-char"><span>${c.emoji}</span><span>${c.short}</span></div>`).join('')}</div>`;
+  wrap.appendChild(ch);
+  Object.values(grouped).forEach(({pref,item})=>{
+    const labelWrap=document.createElement('div');
+    labelWrap.className='search-pref-label';
+    labelWrap.style.padding='6px 14px 0';
+    labelWrap.textContent='📍 '+pref.name;
+    wrap.appendChild(labelWrap);
+    const row=buildItemRow(pref,item,sec,()=>updateProgress());
+    wrap.appendChild(row);
+  });
+  sec.appendChild(wrap);
+  container.appendChild(sec);
+  updateProgress();
+}
+
+document.getElementById('memo-modal').addEventListener('click',(e)=>{
+  if(e.target.id==='memo-modal') closeMemoModal();
+});
+document.getElementById('photo-viewer').addEventListener('click',(e)=>{
+  if(e.target.id==='photo-viewer') closePhotoViewer();
+});
+document.getElementById('search-input').addEventListener('input',(e)=>{
+  searchQuery=e.target.value;
+  render();
+});
+document.getElementById('search-clear').addEventListener('click',()=>{
+  searchQuery='';
+  document.getElementById('search-input').value='';
+  render();
+});
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}
+load();buildTabs();render();
+</script>
+</body>
+</html>
