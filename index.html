@@ -134,6 +134,15 @@ body { font-family: -apple-system,'Hiragino Sans','Hiragino Kaku Gothic ProN',sa
 .stat-char-label { font-size: 10px; color: var(--text2); }
 .stat-best-worst { font-size: 11px; color: var(--text2); line-height: 1.7; background: var(--bg); border-radius: 10px; padding: 10px; }
 .stat-scroll { max-height: 60vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.stamp-row { display: flex; align-items: center; gap: 10px; padding: 10px 4px; border-bottom: 1px solid var(--border); }
+.stamp-row:last-child { border-bottom: none; }
+.stamp-check { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; color: transparent; cursor: pointer; transition: all .15s ease; }
+.stamp-check.on { background: var(--salmon); border-color: var(--salmon); color: #fff; }
+.stamp-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--text); }
+.stamp-name.on { color: var(--text3); text-decoration: line-through; }
+.stamp-date { font-size: 10px; color: var(--text3); }
+.stamp-del { font-size: 12px; color: var(--text3); padding: 4px; cursor: pointer; }
+.stamp-progress { font-size: 12px; font-weight: 700; color: var(--salmon); margin: 6px 4px 10px; }
 .gallery-filter-row { display: flex; gap: 6px; margin-bottom: 10px; }
 .gallery-scroll { max-height: 55vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
@@ -175,6 +184,7 @@ body { font-family: -apple-system,'Hiragino Sans','Hiragino Kaku Gothic ProN',sa
   <div class="header-title-row">
     <div class="header-title">🐾 <span>ちいかわ</span>ご当地コレクション</div>
     <div style="display:flex;gap:4px;">
+      <div class="settings-btn" onclick="openStampModal()">🎫</div>
       <div class="settings-btn" onclick="openGalleryModal()">🖼️</div>
       <div class="settings-btn" onclick="openStatsModal()">📊</div>
       <div class="settings-btn" onclick="openSettingsModal()">⚙️</div>
@@ -250,6 +260,18 @@ body { font-family: -apple-system,'Hiragino Sans','Hiragino Kaku Gothic ProN',sa
 <div class="photo-viewer-overlay" id="photo-viewer">
   <div class="photo-viewer-close" onclick="closePhotoViewer()">✕</div>
   <img class="photo-viewer-img" id="photo-viewer-img" src="">
+</div>
+
+<div class="modal-overlay" id="stamp-modal">
+  <div class="modal-sheet">
+    <div class="modal-title">🎫 店舗スタンプラリー</div>
+    <div class="modal-sub" id="stamp-sub">ちいかわランドなど常設店の来店スタンプを記録できます</div>
+    <div class="stat-scroll" id="stamp-content"></div>
+    <div class="modal-actions" style="flex-direction:column;gap:8px;">
+      <button class="modal-btn cancel" style="width:100%;" onclick="addStampShopPrompt()">＋ 店舗を追加</button>
+      <button class="modal-btn save" style="width:100%;" onclick="closeStampModal()">閉じる</button>
+    </div>
+  </div>
 </div>
 
 <div class="modal-overlay" id="stats-modal">
@@ -521,14 +543,36 @@ const REGIONS=[
   ]}
 ];
 
+// 店舗スタンプラリー用データ（初期値：chiikawa-info.jp公式サイト掲載の常設店舗一覧 / 2026年8月時点確認）
+// 新規オープン店舗は「＋店舗を追加」から手動で追加してください（自動更新はされません）
+const DEFAULT_STAMP_SHOPS=[
+  {id:'osaka',name:'ちいかわらんど 大阪梅田店'},
+  {id:'harajuku',name:'ちいかわらんど 原宿店'},
+  {id:'fukuoka',name:'ちいかわらんど 福岡パルコ店'},
+  {id:'kyoto',name:'ちいかわらんど 京都四条河原町店'},
+  {id:'tokyo_station',name:'ちいかわらんど TOKYO Station'},
+  {id:'solamachi',name:'ちいかわらんど 東京スカイツリータウン・ソラマチ店'},
+  {id:'nagoya',name:'ちいかわらんど 名古屋パルコ店'},
+  {id:'sendai',name:'ちいかわらんど 仙台パルコ店'},
+  {id:'sapporo',name:'ちいかわらんど 札幌パルコ店'},
+  {id:'yokohama',name:'ちいかわらんど 横浜店'},
+  {id:'hiroshima',name:'ちいかわらんど 広島パルコ店'},
+  {id:'shinsaibashi',name:'ちいかわらんど 心斎橋パルコ店'},
+  {id:'shinjuku',name:'ちいかわらんど 新宿店'},
+  {id:'kanazawa',name:'ちいかわらんど 金沢フォーラス店'},
+  {id:'ikebukuro',name:'ちいかわらんど 池袋パルコ店'},
+  {id:'koshigaya',name:'ちいかわらんど 越谷レイクタウン店'}
+];
+
 const SK='chiikawa_pwa_v1';
 let checked={},openState={},memos={},photos={},wishlist={},currentRegion='all',currentFilter='all',searchQuery='';
 let sortMode='default',collapseComplete=true;
+let stampShops=[],stamps={};
 let activeMemoKey=null,pendingPhotoData=null,pendingPhotoRemoved=false;
 
-function load(){try{const s=localStorage.getItem(SK);if(s){const d=JSON.parse(s);checked=d.checked||{};openState=d.openState||{};memos=d.memos||{};photos=d.photos||{};wishlist=d.wishlist||{};sortMode=d.sortMode||'default';collapseComplete=d.collapseComplete!==undefined?d.collapseComplete:true;}}catch(e){}}
+function load(){try{const s=localStorage.getItem(SK);if(s){const d=JSON.parse(s);checked=d.checked||{};openState=d.openState||{};memos=d.memos||{};photos=d.photos||{};wishlist=d.wishlist||{};sortMode=d.sortMode||'default';collapseComplete=d.collapseComplete!==undefined?d.collapseComplete:true;stampShops=d.stampShops||DEFAULT_STAMP_SHOPS.slice();stamps=d.stamps||{};}else{stampShops=DEFAULT_STAMP_SHOPS.slice();}}catch(e){stampShops=DEFAULT_STAMP_SHOPS.slice();}}
 function save(){
-  try{localStorage.setItem(SK,JSON.stringify({checked,openState,memos,photos,wishlist,sortMode,collapseComplete}));}
+  try{localStorage.setItem(SK,JSON.stringify({checked,openState,memos,photos,wishlist,sortMode,collapseComplete,stampShops,stamps}));}
   catch(e){
     alert('保存容量がいっぱいです。古い写真を削除してから保存してください。');
   }
@@ -866,7 +910,7 @@ function compressAllPhotos(){
 }
 function exportBackup(){
   try{
-    const data={checked,openState,memos,photos,wishlist,exportedAt:new Date().toISOString(),app:'chiikawa-collection'};
+    const data={checked,openState,memos,photos,wishlist,stampShops,stamps,exportedAt:new Date().toISOString(),app:'chiikawa-collection'};
     const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -894,6 +938,8 @@ function importBackup(file){
       memos=data.memos||{};
       photos=data.photos||{};
       wishlist=data.wishlist||{};
+      stampShops=data.stampShops||DEFAULT_STAMP_SHOPS.slice();
+      stamps=data.stamps||{};
       save();
       closeSettingsModal();
       buildTabs();
@@ -919,6 +965,70 @@ document.getElementById('stats-modal').addEventListener('click',(e)=>{
 document.getElementById('gallery-modal').addEventListener('click',(e)=>{
   if(e.target.id==='gallery-modal') closeGalleryModal();
 });
+document.getElementById('stamp-modal').addEventListener('click',(e)=>{
+  if(e.target.id==='stamp-modal') closeStampModal();
+});
+
+function openStampModal(){
+  renderStampList();
+  document.getElementById('stamp-modal').classList.add('open');
+}
+function closeStampModal(){
+  document.getElementById('stamp-modal').classList.remove('open');
+}
+function renderStampList(){
+  const el=document.getElementById('stamp-content');
+  const got=stampShops.filter(s=>stamps[s.id]&&stamps[s.id].on).length;
+  const total=stampShops.length;
+  document.getElementById('stamp-sub').textContent=total===0
+    ? '「＋店舗を追加」からスタンプを集めたい店舗を登録してください'
+    : `${got} / ${total} 店舗のスタンプを集めました`;
+  if(total===0){
+    el.innerHTML='<div style="padding:20px 4px;color:var(--text3);font-size:12px;">まだ店舗が登録されていません。</div>';
+    return;
+  }
+  el.innerHTML=`<div class="stamp-progress">🎫 ${got} / ${total}</div>`+stampShops.map(s=>{
+    const rec=stamps[s.id]||{};
+    const on=!!rec.on;
+    const dateStr=on&&rec.date?new Date(rec.date).toLocaleDateString('ja-JP',{year:'numeric',month:'numeric',day:'numeric'}):'';
+    return `<div class="stamp-row">
+      <div class="stamp-check${on?' on':''}" data-sid="${s.id}" onclick="toggleStamp('${s.id}')">${on?'✓':''}</div>
+      <div style="flex:1;">
+        <div class="stamp-name${on?' on':''}">${s.name}</div>
+        ${dateStr?`<div class="stamp-date">${dateStr} 押印</div>`:''}
+      </div>
+      <div class="stamp-del" onclick="deleteStampShop('${s.id}')">✕</div>
+    </div>`;
+  }).join('');
+}
+function toggleStamp(id){
+  const cur=stamps[id]||{};
+  if(cur.on){
+    stamps[id]={on:false};
+  }else{
+    stamps[id]={on:true,date:new Date().toISOString()};
+  }
+  save();
+  renderStampList();
+}
+function addStampShopPrompt(){
+  const name=prompt('追加する店舗名を入力してください（例：ちいかわらんど 〇〇店）');
+  if(!name||!name.trim())return;
+  const id='custom_'+Date.now();
+  stampShops.push({id,name:name.trim()});
+  save();
+  renderStampList();
+}
+function deleteStampShop(id){
+  const shop=stampShops.find(s=>s.id===id);
+  if(!shop)return;
+  const ok=confirm(`「${shop.name}」をリストから削除しますか？（スタンプ記録も消えます）`);
+  if(!ok)return;
+  stampShops=stampShops.filter(s=>s.id!==id);
+  delete stamps[id];
+  save();
+  renderStampList();
+}
 
 function updateProgress(){
   const g=gotochiTotals();
