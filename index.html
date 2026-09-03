@@ -158,6 +158,7 @@ body { font-family: -apple-system,'Hiragino Sans','Hiragino Kaku Gothic ProN',sa
 .type-kh { background: #EEEDFE; color: #4B44AA; }
 .type-mas { background: var(--green-light); color: #2D7A55; }
 .type-shop { background: #FEF0DD; color: #B8702A; }
+.type-link { background: #E3F2FD; color: #1565C0; }
 .char-cells { display: flex; }
 .char-cell { width: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 2px; border-left: 1px solid var(--border); cursor: pointer; gap: 3px; -webkit-user-select: none; user-select: none; }
 .char-cell:active { background: var(--bg); }
@@ -386,15 +387,15 @@ const REGIONS=[
     {name:'和歌山',items:[{n:'パンダ',t:'kh'},{n:'みかん',t:'kh'},{n:'パンダ',t:'mas'}]}
   ]},
   {id:'chugoku',name:'中国・四国',prefs:[
-    {name:'鳥取',items:[{n:'いなばの白うさぎ',t:'kh'},{n:'いなばの白うさぎ',t:'mas'}]},
-    {name:'島根',items:[{n:'縁結び',t:'kh'},{n:'いなばの白うさぎ',t:'kh'},{n:'縁結び',t:'mas'}]},
-    {name:'岡山',items:[{n:'桃太郎',t:'kh'},{n:'瀬戸内レモン',t:'kh'},{n:'桃太郎',t:'mas'}]},
-    {name:'広島',items:[{n:'もみじ饅頭',t:'kh'},{n:'お好み焼き',t:'kh'},{n:'宮島の鹿',t:'kh'},{n:'しゃもじ',t:'kh'},{n:'尾道ラーメン',t:'kh'},{n:'瀬戸内レモン',t:'kh'},{n:'もみじ饅頭',t:'mas'},{n:'お好み焼き',t:'mas'}]},
-    {name:'山口',items:[{n:'ふく',t:'kh'},{n:'瀬戸内レモン',t:'kh'},{n:'ふく',t:'mas'}]},
-    {name:'香川',items:[{n:'さぬきうどん',t:'kh'},{n:'瀬戸内レモン',t:'kh'},{n:'さぬきうどん',t:'mas'}]},
-    {name:'愛媛',items:[{n:'みかん',t:'kh'},{n:'瀬戸内レモン',t:'kh'},{n:'みかん',t:'mas'}]},
+    {name:'鳥取',items:[{n:'いなばの白うさぎ',t:'kh',link:'sanin_inaba'},{n:'いなばの白うさぎ',t:'mas'}]},
+    {name:'島根',items:[{n:'縁結び',t:'kh'},{n:'いなばの白うさぎ',t:'kh',link:'sanin_inaba'},{n:'縁結び',t:'mas'}]},
+    {name:'岡山',items:[{n:'桃太郎',t:'kh'},{n:'瀬戸内レモン',t:'kh',link:'setouchi_lemon'},{n:'桃太郎',t:'mas'}]},
+    {name:'広島',items:[{n:'もみじ饅頭',t:'kh'},{n:'お好み焼き',t:'kh'},{n:'宮島の鹿',t:'kh'},{n:'しゃもじ',t:'kh'},{n:'尾道ラーメン',t:'kh'},{n:'瀬戸内レモン',t:'kh',link:'setouchi_lemon'},{n:'もみじ饅頭',t:'mas'},{n:'お好み焼き',t:'mas'}]},
+    {name:'山口',items:[{n:'ふく',t:'kh'},{n:'瀬戸内レモン',t:'kh',link:'setouchi_lemon'},{n:'ふく',t:'mas'}]},
+    {name:'香川',items:[{n:'さぬきうどん',t:'kh'},{n:'瀬戸内レモン',t:'kh',link:'setouchi_lemon'},{n:'さぬきうどん',t:'mas'}]},
+    {name:'愛媛',items:[{n:'みかん',t:'kh'},{n:'瀬戸内レモン',t:'kh',link:'setouchi_lemon'},{n:'みかん',t:'mas'}]},
     {name:'高知',items:[{n:'坂本龍馬',t:'kh'},{n:'坂本龍馬',t:'mas'}]},
-    {name:'徳島',items:[{n:'うずしお',t:'kh'},{n:'瀬戸内レモン',t:'kh'},{n:'うずしお',t:'mas'}]}
+    {name:'徳島',items:[{n:'うずしお',t:'kh'},{n:'瀬戸内レモン',t:'kh',link:'setouchi_lemon'},{n:'うずしお',t:'mas'}]}
   ]},
   {id:'kyushu',name:'九州・沖縄',prefs:[
     {name:'福岡',items:[{n:'あまおう',t:'kh'},{n:'明太子',t:'kh'},{n:'とんこつラーメン',t:'kh'},{n:'バナナの叩き売り',t:'kh'},{n:'にわか',t:'kh'},{n:'明太子',t:'mas'},{n:'とんこつラーメン',t:'mas'}]},
@@ -578,7 +579,9 @@ function save(){
   }
 }
 function mk(p,n,t,c){return p+'|'+n+'|'+t+'|'+c;}
+function keyFor(prefName,item,c){return mk(item.link||prefName,item.n,item.t,c);}
 function memoKey(p,n,t){return p+'|'+n+'|'+t;}
+function memoKeyFor(prefName,item){return memoKey(item.link||prefName,item.n,item.t);}
 function totalItems(){let t=0;REGIONS.forEach(r=>r.prefs.forEach(p=>p.items.forEach(item=>t+=charsFor(p,item).length)));return t;}
 function qty(key){const v=checked[key];if(v===true)return 1;return v||0;}
 function totalChecked(){return Object.keys(checked).filter(k=>qty(k)>0).length;}
@@ -820,7 +823,7 @@ function renderStats(){
     let c=0,t=0;
     region.prefs.forEach(p=>p.items.forEach(item=>charsFor(p,item).forEach(ch=>{
       t++;
-      if(qty(mk(p.name,item.n,item.t,ch.id))>0)c++;
+      if(qty(keyFor(p.name,item,ch.id))>0)c++;
     })));
     const pct=t?Math.round(c/t*100):0;
     return{name:region.name,pct,c,t};
@@ -838,7 +841,7 @@ function renderStats(){
   const prefStats=[];
   regionsExcl('permashop').forEach(region=>region.prefs.forEach(pref=>{
     let c=0,t=0;
-    pref.items.forEach(item=>charsFor(pref,item).forEach(ch=>{t++;if(qty(mk(pref.name,item.n,item.t,ch.id))>0)c++;}));
+    pref.items.forEach(item=>charsFor(pref,item).forEach(ch=>{t++;if(qty(keyFor(pref.name,item,ch.id))>0)c++;}));
     prefStats.push({name:pref.name,pct:t?Math.round(c/t*100):0,c,t});
   }));
   const sorted=[...prefStats].sort((a,b)=>b.pct-a.pct);
@@ -1090,9 +1093,9 @@ function toggleCollapseComplete(checked){
   render();
 }
 
-function isPrefComplete(p){return p.items.every(i=>charsFor(p,i).every(c=>qty(mk(p.name,i.n,i.t,c.id))>0));}
-function hasPrefUnchecked(p){return p.items.some(i=>charsFor(p,i).some(c=>qty(mk(p.name,i.n,i.t,c.id))===0));}
-function prefCounts(p){let c=0,t=0;p.items.forEach(i=>charsFor(p,i).forEach(ch=>{t++;if(qty(mk(p.name,i.n,i.t,ch.id))>0)c++;}));return{c,t};}
+function isPrefComplete(p){return p.items.every(i=>charsFor(p,i).every(c=>qty(keyFor(p.name,i,c.id))>0));}
+function hasPrefUnchecked(p){return p.items.some(i=>charsFor(p,i).some(c=>qty(keyFor(p.name,i,c.id))===0));}
+function prefCounts(p){let c=0,t=0;p.items.forEach(i=>charsFor(p,i).forEach(ch=>{t++;if(qty(keyFor(p.name,i,ch.id))>0)c++;}));return{c,t};}
 
 function updateHeader(pref,sec){
   const complete=isPrefComplete(pref);
@@ -1105,21 +1108,22 @@ function updateHeader(pref,sec){
   updateProgress();
 }
 
-function prefHasWish(p){return p.items.some(i=>charsFor(p,i).some(c=>!!wishlist[mk(p.name,i.n,i.t,c.id)]));}
-function prefHasTrade(p){return p.items.some(i=>charsFor(p,i).some(c=>qty(mk(p.name,i.n,i.t,c.id))>1));}
+function prefHasWish(p){return p.items.some(i=>charsFor(p,i).some(c=>!!wishlist[keyFor(p.name,i,c.id)]));}
+function prefHasTrade(p){return p.items.some(i=>charsFor(p,i).some(c=>qty(keyFor(p.name,i,c.id))>1));}
 
 function buildItemRow(pref, item, sec, updateHeaderFn){
   const row=document.createElement('div');row.className='item';
   const badge=pref.shopLabel
     ? `<span class="type-badge type-shop">${pref.shopLabel}</span>`
     : (item.t==='kh'?'<span class="type-badge type-kh">KH</span>':'<span class="type-badge type-mas">マスコット</span>');
-  const mKey=memoKey(pref.name,item.n,item.t);
+  const linkBadge=item.link?`<span class="type-badge type-link" title="他県の同じ商品と所持状況を共有しています">🔗共通</span>`:'';
+  const mKey=memoKeyFor(pref.name,item);
   const hasMemo=!!memos[mKey];
   const photoSrc=photos[mKey];
   const thumbHtml = photoSrc ? `<img class="item-thumb" src="${photoSrc}" data-photo="${photoSrc}">` : '';
   const itemChars=charsFor(pref,item);
   const cellW=itemChars.length>3?40:52;
-  row.innerHTML=`<div class="item-label">${thumbHtml}<span>${item.n}${badge}</span></div><div class="memo-btn${hasMemo?' has-memo':''}" data-mkey="${mKey}" data-label="${pref.name} ${item.n}">📝</div><div class="char-cells">${itemChars.map((c,i)=>{const key=mk(pref.name,item.n,item.t,c.id);const n=qty(key);const wished=!!wishlist[key];const starHtml=n===0?`<span class="wish-star${wished?' active':''}" data-wkey="${key}">★</span>`:'';return`<div class="char-cell" data-key="${key}" data-ci="${i}" style="width:${cellW}px"><span class="char-emoji">${c.emoji}</span><div class="check-ring${n>0?' on-'+i:''}">${n>0?n:''}</div>${starHtml}${n>1?`<span class="qty-badge">x${n}</span>`:''}</div>`;}).join('')}</div>`;
+  row.innerHTML=`<div class="item-label">${thumbHtml}<span>${item.n}${badge}${linkBadge}</span></div><div class="memo-btn${hasMemo?' has-memo':''}" data-mkey="${mKey}" data-label="${pref.name} ${item.n}">📝</div><div class="char-cells">${itemChars.map((c,i)=>{const key=keyFor(pref.name,item,c.id);const n=qty(key);const wished=!!wishlist[key];const starHtml=n===0?`<span class="wish-star${wished?' active':''}" data-wkey="${key}">★</span>`:'';return`<div class="char-cell" data-key="${key}" data-ci="${i}" style="width:${cellW}px"><span class="char-emoji">${c.emoji}</span><div class="check-ring${n>0?' on-'+i:''}">${n>0?n:''}</div>${starHtml}${n>1?`<span class="qty-badge">x${n}</span>`:''}</div>`;}).join('')}</div>`;
   const thumbEl=row.querySelector('.item-thumb');
   if(thumbEl) thumbEl.addEventListener('click',(e)=>{e.stopPropagation();openPhotoViewer(thumbEl.dataset.photo);});
   row.querySelector('.memo-btn').addEventListener('click',(e)=>{
@@ -1236,8 +1240,8 @@ function render(){
     wrap.appendChild(ch);
     let itemsShown=0;
     pref.items.forEach(item=>{
-      if(currentFilter==='wish'&&!charsFor(pref,item).some(c=>!!wishlist[mk(pref.name,item.n,item.t,c.id)]))return;
-      if(currentFilter==='trade'&&!charsFor(pref,item).some(c=>qty(mk(pref.name,item.n,item.t,c.id))>1))return;
+      if(currentFilter==='wish'&&!charsFor(pref,item).some(c=>!!wishlist[keyFor(pref.name,item,c.id)]))return;
+      if(currentFilter==='trade'&&!charsFor(pref,item).some(c=>qty(keyFor(pref.name,item,c.id))>1))return;
       itemsShown++;
       const row=buildItemRow(pref,item,sec,()=>updateHeader(pref,sec));
       wrap.appendChild(row);
