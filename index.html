@@ -1136,29 +1136,30 @@ function buildItemRow(pref, item, sec, updateHeaderFn){
       const key=star.dataset.wkey;
       wishlist[key]=!wishlist[key];
       save();
-      star.classList.toggle('active', !!wishlist[key]);
+      document.querySelectorAll(`.wish-star[data-wkey="${key.replace(/"/g,'\\"')}"]`).forEach(el=>{
+        el.classList.toggle('active', !!wishlist[key]);
+      });
     });
   });
   row.querySelectorAll('.char-cell').forEach(cell=>{
     let pressTimer=null,longPressed=false;
-    const refreshCell=()=>{
-      const key=cell.dataset.key,ci=cell.dataset.ci;
+    const refreshCell=(targetCell)=>{
+      const key=targetCell.dataset.key,ci=targetCell.dataset.ci;
       const n=qty(key);
-      const ring=cell.querySelector('.check-ring');
+      const ring=targetCell.querySelector('.check-ring');
       ring.className='check-ring'+(n>0?' on-'+ci:'');
       ring.textContent=n>0?n:'';
       ring.classList.add('pop');setTimeout(()=>ring.classList.remove('pop'),200);
-      const existingBadge=cell.querySelector('.qty-badge');
+      const existingBadge=targetCell.querySelector('.qty-badge');
       if(existingBadge) existingBadge.remove();
       if(n>1){
         const badge=document.createElement('span');
         badge.className='qty-badge';
         badge.textContent='x'+n;
-        cell.appendChild(badge);
+        targetCell.appendChild(badge);
       }
-      const starEl=cell.querySelector('.wish-star');
+      const starEl=targetCell.querySelector('.wish-star');
       if(n>0){
-        if(wishlist[key]){delete wishlist[key];}
         if(starEl) starEl.remove();
       }else{
         if(!starEl){
@@ -1169,11 +1170,17 @@ function buildItemRow(pref, item, sec, updateHeaderFn){
           star.addEventListener('click',(e)=>{
             e.stopPropagation();
             wishlist[key]=!wishlist[key];save();
-            star.classList.toggle('active', !!wishlist[key]);
+            document.querySelectorAll(`.wish-star[data-wkey="${key.replace(/"/g,'\\"')}"]`).forEach(el=>{
+              el.classList.toggle('active', !!wishlist[key]);
+            });
           });
-          cell.insertBefore(star, cell.firstChild);
+          targetCell.insertBefore(star, targetCell.firstChild);
         }
       }
+    };
+    const syncAllCellsForKey=(key)=>{
+      if(wishlist[key]&&qty(key)>0){delete wishlist[key];}
+      document.querySelectorAll(`.char-cell[data-key="${key.replace(/"/g,'\\"')}"]`).forEach(el=>refreshCell(el));
       if(updateHeaderFn) updateHeaderFn();
     };
     cell.addEventListener('touchstart',()=>{
@@ -1182,7 +1189,7 @@ function buildItemRow(pref, item, sec, updateHeaderFn){
         longPressed=true;
         const key=cell.dataset.key;
         checked[key]=0;save();
-        refreshCell();
+        syncAllCellsForKey(key);
       },550);
     });
     cell.addEventListener('touchend',()=>{ if(pressTimer) clearTimeout(pressTimer); });
@@ -1193,7 +1200,7 @@ function buildItemRow(pref, item, sec, updateHeaderFn){
       const current=qty(key);
       checked[key]=current>=3?0:current+1;
       save();
-      refreshCell();
+      syncAllCellsForKey(key);
     });
   });
   return row;
