@@ -339,7 +339,7 @@ body { font-family: -apple-system,'Hiragino Sans','Hiragino Kaku Gothic ProN',sa
 </nav>
 <script>
 const CHARS=[{id:'c',short:'ちい',emoji:'🟠'},{id:'h',short:'ハチ',emoji:'🔵'},{id:'u',short:'うさぎ',emoji:'🩷'}];
-const EXTRA_CHARS=[{id:'m',short:'モモ',emoji:'🐿️'},{id:'k',short:'くり',emoji:'🌰'},{id:'r',short:'ラッコ',emoji:'🦦'},{id:'s',short:'シーサー',emoji:'🦁'},{id:'f',short:'古本屋',emoji:'📚'},{id:'o',short:'オデ',emoji:'👹'},{id:'b',short:'カブト',emoji:'🪲'},{id:'mu',short:'むちゃう',emoji:'😈'}];
+const EXTRA_CHARS=[{id:'hb',short:'所持',emoji:'🎁'},{id:'m',short:'モモ',emoji:'🐿️'},{id:'k',short:'くり',emoji:'🌰'},{id:'r',short:'ラッコ',emoji:'🦦'},{id:'s',short:'シーサー',emoji:'🦁'},{id:'f',short:'古本屋',emoji:'📚'},{id:'o',short:'オデ',emoji:'👹'},{id:'b',short:'カブト',emoji:'🪲'},{id:'mu',short:'むちゃう',emoji:'😈'}];
 const ALL_CHARS=[...CHARS,...EXTRA_CHARS];
 function charsFor(pref,item){
   if(item&&item.chars) return ALL_CHARS.filter(c=>item.chars.includes(c.id));
@@ -519,7 +519,11 @@ const REGIONS=[
       {n:'Tシャツ 伏見稲荷な（うさぎ）',t:'kh',chars:['u']},
       {n:'ZIPパーカー 伏見稲荷な みんな',t:'kh',chars:['c','h','u']},
       {n:'和紙ステッカー（和装なくりまんじゅう）',t:'kh',chars:['k']},
-      {n:'小風呂敷 和装なちいかわとうさぎ',t:'kh',chars:['c','u']}
+      {n:'小風呂敷 和装なちいかわとうさぎ',t:'kh',chars:['c','u']},
+      // 2026-10 追加: 公式ショップ(chiikawamogumogu.shop)掲載。きつね=ハチワレのみ公式で確認、ちいかわ/うさぎは写真ベース
+      {n:'メタルチャームキーホルダー（きつね）',t:'kh',chars:['c','h','u']},
+      {n:'メタルチャームキーホルダー（抹茶）',t:'kh',chars:['c','h','u']},
+      {n:'鈴付きアクリルキーホルダー（稲荷な）',t:'kh',chars:['c','h','u','f']}
     ]},
     {name:'ちいかわもぐもぐ本舗（川越）',shopLabel:'川越限定',items:[
       {n:'おいもなぬいぐるみ（ちいかわ）',t:'mas',chars:['c']},
@@ -548,6 +552,14 @@ const REGIONS=[
       // 2026年6月26日 KITTE大阪にオープン。大阪限定メニュー・グッズありと公式発表されていますが
       // 具体的な商品名は現時点(2026年9月)で未確認のため、項目名のみ登録しています。
       // 情報が揃い次第、具体的な商品を追加してください。
+    ]},
+    {name:'ちいかわハッピーバッグ',shopLabel:'ハッピーバッグ',chars:['hb'],items:[
+      {n:'2027 未年（予約 2026/8/26〜9/2・11,000円）',t:'kh'},
+      {n:'2026 午年（11,000円）',t:'kh'},
+      {n:'2025 巳年（9,900円）',t:'kh'},
+      {n:'2024 辰年',t:'kh'},
+      {n:'2023 卯年',t:'kh'},
+      {n:'2022 寅年',t:'kh'}
     ]}
   ]}
 ];
